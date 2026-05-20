@@ -131,14 +131,26 @@
 <style>@media(min-width:720px){#ct-grid{grid-template-columns:1fr 1fr;}}</style>
 
 <script>
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     const msg = document.getElementById('form-msg');
-    msg.style.display = 'block';
-    msg.style.background = '#f0fdf4';
-    msg.style.color = '#166534';
-    msg.textContent = '✓ Thanks! We\'ll reach out within 24 hours to schedule your estimate.';
-    e.target.reset();
+    try {
+      const res = await fetch('https://formspree.io/f/mlgvjjjn', {
+        method: 'POST', body: new FormData(e.target),
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        msg.style.display = 'block'; msg.style.background = '#f0fdf4'; msg.style.color = '#166534';
+        msg.textContent = '✓ Thanks! We\'ll reach out within 24 hours to schedule your estimate.';
+        e.target.reset();
+      } else {
+        msg.style.display = 'block'; msg.style.background = '#fef2f2'; msg.style.color = '#991b1b';
+        msg.textContent = 'Something went wrong. Please call us at (970) 696-7921.';
+      }
+    } catch {
+      msg.style.display = 'block'; msg.style.background = '#fef2f2'; msg.style.color = '#991b1b';
+      msg.textContent = 'Something went wrong. Please call us at (970) 696-7921.';
+    }
   }
 </script>
 </body>

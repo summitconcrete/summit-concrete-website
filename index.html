@@ -1108,15 +1108,27 @@
     if (!isOpen) item.classList.add('open');
   }
 
-  // Form (wire to Formspree later)
-  function handleSubmit(e) {
+  // Form → Formspree
+  async function handleSubmit(e) {
     e.preventDefault();
     const msg = document.getElementById('form-msg');
-    msg.style.display = 'block';
-    msg.style.background = '#f0fdf4';
-    msg.style.color = '#166534';
-    msg.textContent = '✓ Thanks! We\'ll reach out within 24 hours to schedule your estimate.';
-    e.target.reset();
+    try {
+      const res = await fetch('https://formspree.io/f/mlgvjjjn', {
+        method: 'POST', body: new FormData(e.target),
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        msg.style.display = 'block'; msg.style.background = '#f0fdf4'; msg.style.color = '#166534';
+        msg.textContent = '✓ Thanks! We\'ll reach out within 24 hours to schedule your estimate.';
+        e.target.reset();
+      } else {
+        msg.style.display = 'block'; msg.style.background = '#fef2f2'; msg.style.color = '#991b1b';
+        msg.textContent = 'Something went wrong. Please call us at (970) 696-7921.';
+      }
+    } catch {
+      msg.style.display = 'block'; msg.style.background = '#fef2f2'; msg.style.color = '#991b1b';
+      msg.textContent = 'Something went wrong. Please call us at (970) 696-7921.';
+    }
   }
 
   // Counter animation for stats
@@ -1176,14 +1188,26 @@
     document.body.style.overflow = '';
   }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEstimateModal(); });
-  function handleModalSubmit(e) {
+  async function handleModalSubmit(e) {
     e.preventDefault();
     const msg = document.getElementById('modal-form-msg');
-    msg.style.display = 'block';
-    msg.style.background = '#f0fdf4';
-    msg.style.color = '#166534';
-    msg.textContent = '✓ Thanks! We\'ll reach out within 24 hours to schedule your estimate.';
-    e.target.reset();
+    try {
+      const res = await fetch('https://formspree.io/f/mlgvjjjn', {
+        method: 'POST', body: new FormData(e.target),
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        msg.style.display = 'block'; msg.style.background = '#f0fdf4'; msg.style.color = '#166534';
+        msg.textContent = '✓ Thanks! We\'ll reach out within 24 hours to schedule your estimate.';
+        e.target.reset();
+      } else {
+        msg.style.display = 'block'; msg.style.background = '#fef2f2'; msg.style.color = '#991b1b';
+        msg.textContent = 'Something went wrong. Please call us at (970) 696-7921.';
+      }
+    } catch {
+      msg.style.display = 'block'; msg.style.background = '#fef2f2'; msg.style.color = '#991b1b';
+      msg.textContent = 'Something went wrong. Please call us at (970) 696-7921.';
+    }
   }
 
   // Scroll reveal
