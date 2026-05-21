@@ -353,6 +353,83 @@
     .field input, .field select, .field textarea { width: 100%; padding: .75rem 1rem; border: 1.5px solid var(--border); border-radius: 8px; font-size: .9rem; font-family: 'Inter', sans-serif; outline: none; transition: border-color .2s; background: #fff; }
     .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--green); }
     .field textarea { resize: vertical; }
+
+    /* ═══════════════════════════════════════════════
+       REDESIGN — CONTRACTOR PALETTE
+    ═══════════════════════════════════════════════ */
+    :root {
+      --charcoal: #141414;
+      --dark:     #1c1c1c;
+      --stone:    #f0ebe4;
+      --cream:    #faf6f1;
+    }
+
+    /* Global concrete grain texture */
+    html::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: .022;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 180px;
+    }
+
+    /* Shimmer → solid green */
+    .shimmer-word {
+      background: none;
+      -webkit-background-clip: unset;
+      background-clip: unset;
+      -webkit-text-fill-color: var(--green);
+      animation: none;
+    }
+
+    /* Dark section: headings */
+    #services .section-h, #process .section-h, #gallery .section-h,
+    #reviews .section-h, #faq .section-h { color: #f0ede8; }
+
+    /* Dark section: all muted gray inline text → faded white */
+    #services [style*="color:#6b7280"],
+    #process  [style*="color:#6b7280"],
+    #gallery  [style*="color:#6b7280"],
+    #faq      [style*="color:#6b7280"] { color: rgba(255,255,255,.42) !important; }
+
+    /* Service cards on dark */
+    #services .svc-card { background: #222; box-shadow: 0 2px 12px rgba(0,0,0,.5), 0 16px 48px rgba(0,0,0,.6); }
+    #services .svc-title { color: #f0ede8; }
+    #services .svc-desc  { color: rgba(255,255,255,.42); }
+    #services .svc-list li { color: rgba(255,255,255,.68); }
+    #services .svc-tag { background: rgba(121,181,47,.18); }
+
+    /* Process on dark */
+    #process .step-body h3 { color: #f0ede8; }
+    #process .step-body p  { color: rgba(255,255,255,.42); }
+
+    /* Reviews on dark */
+    #reviews .review-card { background: #242424; box-shadow: 0 2px 12px rgba(0,0,0,.5), 0 10px 40px rgba(0,0,0,.55); }
+    #reviews .review-card:hover { transform: translateY(-5px); box-shadow: 0 8px 48px rgba(0,0,0,.65); }
+    #reviews .review-text { color: rgba(255,255,255,.62); }
+    #reviews .reviewer    { color: #f0ede8; }
+    #reviews .reviewer-loc { color: rgba(255,255,255,.3); }
+
+    /* FAQ on dark */
+    #faq .faq-item  { border-color: rgba(255,255,255,.08); }
+    #faq .faq-q     { color: #f0ede8; }
+    #faq .faq-icon  { background: rgba(255,255,255,.08); }
+    #faq .faq-icon svg { stroke: rgba(255,255,255,.55); }
+    #faq .faq-item.open .faq-icon     { background: var(--green); }
+    #faq .faq-item.open .faq-icon svg { stroke: #fff; }
+    #faq .faq-ans p { color: rgba(255,255,255,.5); }
+
+    /* Why cards on stone */
+    #why .why-card { background: #fff; }
+
+    /* Loc cards on stone */
+    #locations .loc-card { background: #fff; }
+
+    /* Loc SEO block on stone */
+    #locations .seo-block { background: rgba(255,255,255,.65) !important; border-color: rgba(0,0,0,.06) !important; }
   </style>
 </head>
 <body>
@@ -394,12 +471,8 @@
 
 <!-- ══════════ HERO ══════════ -->
 <section id="hero">
-  <div class="hero-glow-1"></div>
-  <div class="hero-glow-2"></div>
-  <!-- Ghost logo watermark -->
-  <div style="position:absolute;bottom:-40px;right:-40px;width:420px;height:420px;opacity:.04;pointer-events:none;z-index:0;">
-    <img src="logo.png" alt="" style="width:100%;height:100%;object-fit:contain;filter:brightness(10) saturate(0);">
-  </div>
+  <div style="position:absolute;inset:0;background-image:url('ba-a1-new.png');background-size:cover;background-position:center;opacity:.1;pointer-events:none;"></div>
+  <div style="position:absolute;inset:0;background:linear-gradient(160deg,rgba(13,24,37,.97) 0%,rgba(13,24,37,.85) 55%,rgba(13,24,37,.68) 100%);pointer-events:none;"></div>
   <div class="wrap" style="padding-top:5rem;padding-bottom:5rem;position:relative;z-index:1;">
     <div style="display:grid;gap:3rem;align-items:center;" id="hero-grid">
 
@@ -517,7 +590,7 @@
 <style>@media(min-width:640px){#stats-grid{grid-template-columns:repeat(4,1fr);}}</style>
 
 <!-- ══════════ SERVICES ══════════ -->
-<section id="services" style="padding:6rem 0;background:var(--pale);">
+<section id="services" style="padding:6rem 0;background:var(--charcoal);">
   <div class="wrap">
     <div style="text-align:center;margin-bottom:3.5rem;">
       <p class="eyebrow rev">What We Do</p>
@@ -572,10 +645,9 @@
 <style>@media(min-width:768px){#svc-grid{grid-template-columns:1fr 1fr;}}</style>
 
 <!-- ══════════ WHY US ══════════ -->
-<section id="why" style="padding:6rem 0;background:#fff;">
+<section id="why" style="padding:6rem 0;background:var(--stone);">
   <div class="wrap">
     <div style="text-align:center;margin-bottom:3rem;">
-      <img src="logo.png" alt="" class="section-logo logo-float rev">
       <p class="eyebrow rev">Why Summit</p>
       <h2 class="section-h rev d1" style="margin:.5rem 0 1rem;">What Makes Us Different</h2>
       <p class="rev d2" style="color:#6b7280;max-width:480px;margin:0 auto;font-size:.9rem;line-height:1.75;">We're not a national franchise. We're a local Colorado crew that lives and works in the mountains.</p>
@@ -607,7 +679,7 @@
 <style>@media(min-width:480px){#why-grid{grid-template-columns:1fr 1fr;}}@media(min-width:900px){#why-grid{grid-template-columns:repeat(4,1fr);}}</style>
 
 <!-- ══════════ PROCESS ══════════ -->
-<section id="process" style="padding:6rem 0;background:var(--pale);">
+<section id="process" style="padding:6rem 0;background:var(--dark);">
   <div class="wrap">
     <div style="display:grid;gap:4.5rem;align-items:center;" id="proc-grid">
       <div>
@@ -656,7 +728,7 @@
 <style>@media(min-width:900px){#proc-grid{grid-template-columns:1fr 1fr;}}</style>
 
 <!-- ══════════ FLAKE OPTIONS ══════════ -->
-<section id="flakes" style="padding:6rem 0;background:#fff;">
+<section id="flakes" style="padding:6rem 0;background:var(--cream);">
   <div class="wrap">
     <div style="text-align:center;margin-bottom:3rem;">
       <p class="eyebrow rev">Color System</p>
@@ -699,7 +771,7 @@
 <style>@media(min-width:768px){#flakes-grid{grid-template-columns:3fr 2fr;}}</style>
 
 <!-- ══════════ GALLERY ══════════ -->
-<section id="gallery" style="padding:6rem 0;background:var(--pale);">
+<section id="gallery" style="padding:6rem 0;background:var(--charcoal);">
   <div class="wrap">
     <div style="text-align:center;margin-bottom:3rem;">
       <p class="eyebrow rev">Our Work</p>
@@ -753,10 +825,9 @@
 <style>@media(min-width:640px){.ba-grid{grid-template-columns:1fr 1fr;}}</style>
 
 <!-- ══════════ TESTIMONIALS ══════════ -->
-<section id="reviews" style="padding:6rem 0;background:#fff;">
+<section id="reviews" style="padding:6rem 0;background:var(--dark);">
   <div class="wrap">
     <div style="text-align:center;margin-bottom:3rem;">
-      <img src="logo.png" alt="" class="section-logo logo-float rev">
       <p class="eyebrow rev">Reviews</p>
       <h2 class="section-h rev d1" style="margin:.5rem 0 1rem;">What Colorado<br>Homeowners Say</h2>
     </div>
@@ -782,7 +853,7 @@
 <style>@media(min-width:768px){#rev-grid{grid-template-columns:repeat(3,1fr);}}</style>
 
 <!-- ══════════ LOCATIONS ══════════ -->
-<section id="locations" style="padding:6rem 0;background:var(--pale);">
+<section id="locations" style="padding:6rem 0;background:var(--stone);">
   <div class="wrap">
     <div style="text-align:center;margin-bottom:3rem;">
       <p class="eyebrow rev">Service Area</p>
@@ -849,7 +920,7 @@
     </div>
 
     <!-- SEO copy block -->
-    <div class="rev" style="margin-top:3rem;background:#fff;border-radius:14px;padding:2rem 2.5rem;border:1px solid var(--border);">
+    <div class="rev seo-block" style="margin-top:3rem;background:#fff;border-radius:14px;padding:2rem 2.5rem;border:1px solid var(--border);">
       <p style="font-size:.875rem;color:#6b7280;line-height:1.9;text-align:center;max-width:800px;margin:0 auto;">
         Summit Concrete Finishes is based in Steamboat Springs and serves homeowners and property managers across Colorado's mountain corridor.
         Whether you need <strong style="color:#374151;">garage floor epoxy in Vail</strong>,
@@ -864,7 +935,7 @@
 </section>
 
 <!-- ══════════ FAQ ══════════ -->
-<section id="faq" style="padding:6rem 0;background:#fff;">
+<section id="faq" style="padding:6rem 0;background:var(--charcoal);">
   <div class="wrap" style="max-width:760px;">
     <div style="text-align:center;margin-bottom:3rem;">
       <p class="eyebrow rev">FAQ</p>
@@ -925,7 +996,7 @@
 </section>
 
 <!-- ══════════ CONTACT ══════════ -->
-<section id="contact" style="padding:6rem 0;background:var(--pale);">
+<section id="contact" style="padding:6rem 0;background:var(--stone);">
   <div class="wrap">
     <div style="display:grid;gap:4rem;align-items:start;" id="ct-grid">
 
