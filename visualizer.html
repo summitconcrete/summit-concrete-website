@@ -12,225 +12,155 @@
   <style>
     :root {
       --navy-dark: #0d1825;
-      --navy:      #1b3360;
       --green:     #79b52f;
       --green-lt:  #8fc73e;
       --charcoal:  #141414;
       --dark:      #1c1c1c;
-      --stone:     #f0ebe4;
-      --border:    #e5e7eb;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: var(--charcoal); -webkit-font-smoothing: antialiased; }
     .font-display { font-family: 'Barlow Condensed', sans-serif; }
 
-    /* ── NAV ── */
-    #viz-nav { background: var(--navy-dark); border-bottom: 1px solid rgba(121,181,47,.12); position: sticky; top: 0; z-index: 100; }
-    .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    nav { background: var(--navy-dark); border-bottom: 1px solid rgba(121,181,47,.12); position: sticky; top: 0; z-index: 100; }
+    .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; height: 76px; display: flex; align-items: center; justify-content: space-between; }
     .nav-back { display: inline-flex; align-items: center; gap: .45rem; color: rgba(255,255,255,.5); font-size: .8rem; font-weight: 600; text-decoration: none; transition: color .2s; }
     .nav-back:hover { color: #fff; }
-    .nav-cta { display: inline-flex; align-items: center; gap: .4rem; background: var(--green); color: #fff; font-weight: 700; font-size: .85rem; padding: .55rem 1.1rem; border-radius: 8px; text-decoration: none; transition: background .2s; white-space: nowrap; }
+    .nav-cta { display: inline-flex; align-items: center; gap: .4rem; background: var(--green); color: #fff; font-weight: 700; font-size: .85rem; padding: .55rem 1.1rem; border-radius: 8px; text-decoration: none; }
     .nav-cta:hover { background: var(--green-lt); }
 
-    /* ── PREVIEW ── */
-    .preview-shell {
-      position: relative;
-      overflow: hidden;
-      border-radius: 14px;
-      background: #0a0a0a;
-      line-height: 0;
-      box-shadow: 0 4px 32px rgba(0,0,0,.6);
-      user-select: none;
-    }
-    .preview-shell img {
-      width: 100%;
-      height: auto;
-      display: block;
-      pointer-events: none;
-      -webkit-user-drag: none;
-      filter: brightness(1.18) contrast(1.05);
-    }
-    .floor-overlay {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      transition: background-color .28s ease, opacity .35s ease;
-      -webkit-mask-image: linear-gradient(to bottom, transparent 48%, rgba(0,0,0,.7) 56%, black 64%);
-      mask-image:         linear-gradient(to bottom, transparent 48%, rgba(0,0,0,.7) 56%, black 64%);
-    }
-    .compare-active .floor-overlay { opacity: 0 !important; }
+    /* Canvas preview */
+    .preview-shell { position: relative; border-radius: 14px; overflow: hidden; background: #0a0a0a; line-height: 0; box-shadow: 0 4px 40px rgba(0,0,0,.7); }
+    #floorCanvas { width: 100%; height: auto; display: block; }
 
-    /* ── COMPARE BUTTON ── */
-    .compare-btn {
-      display: inline-flex; align-items: center; gap: .45rem;
-      padding: .55rem 1.1rem; border-radius: 8px; font-size: .8rem; font-weight: 600;
-      border: 1.5px solid rgba(255,255,255,.14); color: rgba(255,255,255,.5);
-      background: rgba(255,255,255,.05); cursor: pointer; transition: background .15s, color .15s;
-      user-select: none; -webkit-user-select: none;
-    }
-    .compare-btn:hover { background: rgba(255,255,255,.1); color: rgba(255,255,255,.75); }
+    /* Loading spinner over canvas */
+    .canvas-loading { position: absolute; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; }
+    .spinner { width: 36px; height: 36px; border: 3px solid rgba(255,255,255,.15); border-top-color: var(--green); border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── MODE BUTTONS ── */
-    .mode-btn {
-      display: inline-flex; align-items: center; gap: .5rem;
-      padding: .55rem 1rem; border-radius: 8px; font-size: .82rem; font-weight: 600;
-      border: 1.5px solid rgba(255,255,255,.1); color: rgba(255,255,255,.45);
-      background: rgba(255,255,255,.04); cursor: pointer; transition: all .2s;
-    }
-    .mode-btn:hover { background: rgba(255,255,255,.09); color: rgba(255,255,255,.7); }
-    .mode-btn.active { background: rgba(121,181,47,.12); border-color: rgba(121,181,47,.5); color: var(--green); }
+    /* Control buttons */
+    .ctrl-btn { display: inline-flex; align-items: center; gap: .45rem; padding: .55rem 1rem; border-radius: 8px; font-size: .8rem; font-weight: 600; border: 1.5px solid rgba(255,255,255,.1); color: rgba(255,255,255,.45); background: rgba(255,255,255,.04); cursor: pointer; transition: all .2s; }
+    .ctrl-btn:hover { background: rgba(255,255,255,.09); color: rgba(255,255,255,.75); border-color: rgba(255,255,255,.18); }
+    .ctrl-btn.active { background: rgba(121,181,47,.12); border-color: rgba(121,181,47,.5); color: var(--green); }
 
-    /* ── CATEGORY TABS ── */
-    .cat-tab {
-      padding: .4rem 1rem; border-radius: 100px; font-size: .78rem; font-weight: 700;
-      border: 1.5px solid rgba(255,255,255,.1); color: rgba(255,255,255,.4);
-      background: none; cursor: pointer; transition: all .2s; white-space: nowrap;
-    }
+    /* Category tabs */
+    .cat-tab { padding: .4rem 1rem; border-radius: 100px; font-size: .78rem; font-weight: 700; border: 1.5px solid rgba(255,255,255,.1); color: rgba(255,255,255,.4); background: none; cursor: pointer; transition: all .2s; white-space: nowrap; }
     .cat-tab:hover { border-color: rgba(255,255,255,.2); color: rgba(255,255,255,.65); }
     .cat-tab.active { background: var(--green); color: #fff; border-color: var(--green); }
 
-    /* ── SWATCHES ── */
-    .swatch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .65rem; }
+    /* Swatch grid */
+    .swatch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; }
     @media(min-width:480px){ .swatch-grid { grid-template-columns: repeat(4, 1fr); } }
-    @media(min-width:860px){ .swatch-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media(min-width:900px){ .swatch-grid { grid-template-columns: repeat(3, 1fr); } }
 
     .swatch-item { display: flex; flex-direction: column; align-items: center; gap: .4rem; cursor: pointer; }
     .swatch-chip {
-      width: 100%; aspect-ratio: 1; border-radius: 10px;
-      border: 2.5px solid transparent;
+      width: 100%; aspect-ratio: 1; border-radius: 8px;
+      border: 2.5px solid transparent; overflow: hidden;
+      background-size: cover; background-position: center;
       transition: transform .15s cubic-bezier(.22,1,.36,1), border-color .15s, box-shadow .15s;
-      position: relative; overflow: hidden;
+      position: relative;
     }
-    .swatch-chip::after {
-      content: '';
-      position: absolute; inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.18'/%3E%3C/svg%3E");
-      pointer-events: none;
-    }
-    .swatch-item:hover .swatch-chip { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.4); }
-    .swatch-item.active .swatch-chip { border-color: var(--green); box-shadow: 0 0 0 3px rgba(121,181,47,.25); transform: translateY(-2px); }
-    .swatch-check {
-      display: none; position: absolute; inset: 0;
-      align-items: center; justify-content: center;
-      background: rgba(121,181,47,.3);
-    }
+    .swatch-item:hover .swatch-chip { transform: scale(1.06); box-shadow: 0 4px 16px rgba(0,0,0,.5); }
+    .swatch-item.active .swatch-chip { border-color: var(--green); box-shadow: 0 0 0 3px rgba(121,181,47,.3); transform: scale(1.06); }
+    .swatch-check { display: none; position: absolute; inset: 0; background: rgba(121,181,47,.35); align-items: center; justify-content: center; }
     .swatch-item.active .swatch-check { display: flex; }
-    .swatch-name { font-size: .68rem; font-weight: 600; color: rgba(255,255,255,.4); text-align: center; line-height: 1.3; transition: color .15s; }
-    .swatch-item:hover .swatch-name { color: rgba(255,255,255,.65); }
+    .swatch-name { font-size: .67rem; font-weight: 600; color: rgba(255,255,255,.4); text-align: center; line-height: 1.3; }
+    .swatch-item:hover .swatch-name { color: rgba(255,255,255,.7); }
     .swatch-item.active .swatch-name { color: var(--green); }
 
-    /* ── COLOR INFO ── */
-    .color-info-bar {
-      display: flex; align-items: center; gap: .85rem;
-      background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08);
-      border-radius: 10px; padding: .8rem 1rem; margin-top: .85rem;
-    }
-    .info-pip { width: 22px; height: 22px; border-radius: 5px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,.4); }
+    /* Info bar */
+    .info-bar { display: flex; align-items: center; gap: .85rem; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; padding: .8rem 1rem; margin-top: .85rem; }
+    .info-thumb { width: 42px; height: 42px; border-radius: 6px; background-size: cover; background-position: center; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,.5); }
 
-    /* ── STICKY RIGHT ── */
-    @media(min-width:900px){
-      .picker-sticky { position: sticky; top: 90px; }
-    }
-
-    /* ── UPLOAD MASK ── */
-    .upload-mask .floor-overlay {
-      -webkit-mask-image: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,.7) 50%, black 60%);
-      mask-image:         linear-gradient(to bottom, transparent 40%, rgba(0,0,0,.7) 50%, black 60%);
-    }
+    @media(min-width:900px){ .picker-sticky { position: sticky; top: 90px; } }
+    @media(min-width:900px){ #viz-grid { grid-template-columns: 3fr 2fr; } }
   </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav id="viz-nav">
+<nav>
   <div class="nav-inner">
     <div style="display:flex;align-items:center;gap:1.25rem;">
-      <a href="index.html">
-        <img src="logo.png" alt="Summit Concrete Finishes" style="height:60px;width:auto;">
-      </a>
+      <a href="index.html"><img src="logo.png" alt="Summit Concrete Finishes" style="height:60px;width:auto;"></a>
       <a href="index.html" class="nav-back">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
         Back to Site
       </a>
     </div>
     <div style="display:flex;align-items:center;gap:.75rem;">
-      <a href="tel:9706967921" style="color:rgba(255,255,255,.5);font-size:.82rem;font-weight:600;text-decoration:none;" id="nav-phone">(970) 696-7921</a>
+      <a href="tel:9706967921" style="color:rgba(255,255,255,.5);font-size:.82rem;font-weight:600;text-decoration:none;">(970) 696-7921</a>
       <a href="contact.html" class="nav-cta">Free Estimate</a>
     </div>
   </div>
 </nav>
 
-<!-- HERO STRIP -->
 <div style="background:var(--navy-dark);padding:3rem 1.5rem 2.5rem;border-bottom:1px solid rgba(255,255,255,.04);">
   <div style="max-width:860px;margin:0 auto;text-align:center;">
-    <p style="font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:.6rem;">Interactive Visualizer</p>
-    <h1 class="font-display" style="font-size:clamp(2.2rem,6vw,3.75rem);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.04;margin-bottom:.9rem;">See Your Color Before<br>You Commit</h1>
-    <p style="color:rgba(255,255,255,.45);font-size:.9rem;line-height:1.8;max-width:480px;margin:0 auto;">Upload a photo of your garage — or use our sample. Click any flake blend to preview it on your floor in real time.</p>
+    <p style="font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:.6rem;">Interactive Floor Visualizer</p>
+    <h1 class="font-display" style="font-size:clamp(2.2rem,6vw,3.75rem);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.04;margin-bottom:.9rem;">See Your Floor Before<br>You Commit</h1>
+    <p style="color:rgba(255,255,255,.45);font-size:.9rem;line-height:1.8;max-width:480px;margin:0 auto;">Upload a photo of your garage or use our sample. Click any blend to preview the actual flake system on your floor.</p>
   </div>
 </div>
 
-<!-- TOOL -->
 <section style="padding:2.5rem 1.5rem 5rem;">
   <div style="max-width:1160px;margin:0 auto;">
     <div style="display:grid;gap:2rem;align-items:start;" id="viz-grid">
 
-      <!-- ── LEFT: Preview ── -->
+      <!-- LEFT: Canvas preview -->
       <div>
-        <!-- Controls row -->
+        <!-- Controls -->
         <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.9rem;">
-          <button class="mode-btn active" id="btn-sample" onclick="useSample()">
+          <button class="ctrl-btn active" id="btn-sample" onclick="useSample()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
             Sample Garage
           </button>
-          <label class="mode-btn" id="btn-upload" style="cursor:pointer;">
+          <label class="ctrl-btn" id="btn-upload" style="cursor:pointer;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             Upload Your Photo
-            <input type="file" accept="image/*" id="upload-input" style="display:none;" onchange="handleUpload(event)">
+            <input type="file" accept="image/*" style="display:none;" onchange="handleUpload(event)">
           </label>
-          <button class="compare-btn" id="compare-btn"
+          <button class="ctrl-btn" id="btn-compare"
             onmousedown="startCompare()" onmouseup="endCompare()"
             ontouchstart="startCompare(event)" ontouchend="endCompare()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3H5a2 2 0 00-2 2v14a2 2 0 002 2h3M16 3h3a2 2 0 012 2v14a2 2 0 01-2 2h-3M12 3v18"/></svg>
             Hold to Compare
           </button>
         </div>
 
-        <!-- Preview image -->
+        <!-- Canvas -->
         <div class="preview-shell" id="preview-shell">
-          <img id="garage-img" src="ba-b1-new.png" alt="Garage floor preview" draggable="false">
-          <div class="floor-overlay" id="floor-overlay"></div>
-
-          <!-- Corner badge: selected color -->
-          <div id="color-badge" style="position:absolute;bottom:12px;right:12px;display:flex;align-items:center;gap:.5rem;background:rgba(0,0,0,.62);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.4rem .75rem;pointer-events:none;">
-            <div id="badge-chip" style="width:12px;height:12px;border-radius:3px;background:#252525;flex-shrink:0;"></div>
-            <span id="badge-name" style="font-size:.72rem;font-weight:700;color:#fff;letter-spacing:.03em;white-space:nowrap;">Charcoal Storm</span>
+          <canvas id="floorCanvas"></canvas>
+          <div class="canvas-loading" id="canvas-loading" style="display:none;">
+            <div class="spinner"></div>
+          </div>
+          <!-- Corner badge -->
+          <div id="color-badge" style="position:absolute;bottom:12px;right:12px;display:flex;align-items:center;gap:.5rem;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.4rem .75rem;pointer-events:none;">
+            <div id="badge-thumb" style="width:16px;height:16px;border-radius:3px;background-size:cover;flex-shrink:0;"></div>
+            <span id="badge-name" style="font-size:.72rem;font-weight:700;color:#fff;white-space:nowrap;">Gravel</span>
           </div>
         </div>
 
-        <!-- Color info bar -->
-        <div class="color-info-bar">
-          <div class="info-pip" id="info-pip" style="background:#252525;"></div>
+        <!-- Info bar -->
+        <div class="info-bar">
+          <div class="info-thumb" id="info-thumb"></div>
           <div style="flex:1;min-width:0;">
-            <div style="font-size:.85rem;font-weight:700;color:#f0ede8;" id="info-name">Charcoal Storm</div>
+            <div style="font-size:.85rem;font-weight:700;color:#f0ede8;" id="info-name">Gravel</div>
             <div style="font-size:.72rem;color:rgba(255,255,255,.38);" id="info-cat">Signature Blend</div>
           </div>
-          <a href="contact.html" style="font-size:.8rem;font-weight:700;color:var(--green);text-decoration:none;white-space:nowrap;flex-shrink:0;">
-            Quote this color →
-          </a>
+          <a href="contact.html" style="font-size:.8rem;font-weight:700;color:var(--green);text-decoration:none;flex-shrink:0;">Quote this blend →</a>
         </div>
         <p style="font-size:.7rem;color:rgba(255,255,255,.22);text-align:center;margin-top:.6rem;line-height:1.6;" id="tip-text">
-          Color preview applied to floor area using the "before" photo. Hold Compare to see original concrete.
+          Actual flake texture rendered on the floor area. Hold Compare to see the original concrete.
         </p>
       </div>
 
-      <!-- ── RIGHT: Picker ── -->
+      <!-- RIGHT: Color picker -->
       <div class="picker-sticky">
         <div style="margin-bottom:1.25rem;">
-          <h2 class="font-display" style="font-size:1.75rem;font-weight:900;color:#f0ede8;letter-spacing:-.02em;margin-bottom:.25rem;">Pick Your Blend</h2>
-          <p style="font-size:.82rem;color:rgba(255,255,255,.38);">Click any swatch to preview it on your floor.</p>
+          <h2 class="font-display" style="font-size:1.75rem;font-weight:900;color:#f0ede8;letter-spacing:-.02em;margin-bottom:.25rem;">Choose Your Blend</h2>
+          <p style="font-size:.82rem;color:rgba(255,255,255,.38);">Click any blend to see it on your floor.</p>
         </div>
 
-        <!-- Category tabs -->
         <div style="display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:1.25rem;">
           <button class="cat-tab active" onclick="setCategory('all',this)">All</button>
           <button class="cat-tab" onclick="setCategory('signature',this)">Signature</button>
@@ -238,29 +168,22 @@
           <button class="cat-tab" onclick="setCategory('stone',this)">Stone</button>
         </div>
 
-        <!-- Swatches -->
         <div class="swatch-grid" id="swatch-grid"></div>
 
-        <!-- Description -->
         <div style="margin-top:1.25rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:1.1rem;">
           <p style="font-size:.82rem;color:rgba(255,255,255,.5);line-height:1.75;" id="color-desc">
-            Our most popular blend. Dark charcoal with silver and white flakes — works with any garage aesthetic and holds up to everything Colorado winters throw at it.
+            Classic gray, silver, and white mix. Clean and neutral — the most universally flattering floor for any garage.
           </p>
         </div>
 
-        <!-- Divider -->
         <div style="height:1px;background:rgba(255,255,255,.07);margin:1.5rem 0;"></div>
 
-        <!-- CTAs -->
         <div style="display:flex;flex-direction:column;gap:.7rem;">
           <a href="contact.html" style="display:flex;align-items:center;justify-content:center;gap:.5rem;background:var(--green);color:#fff;font-weight:700;font-size:.95rem;padding:.875rem 1.5rem;border-radius:10px;text-decoration:none;transition:background .2s;" onmouseover="this.style.background='var(--green-lt)'" onmouseout="this.style.background='var(--green)'">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.93a19.79 19.79 0 01-3.07-8.67A2 2 0 012.18 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 8.09a16 16 0 006 6l.56-.56a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
             Get a Free In-Person Estimate
           </a>
           <p style="font-size:.72rem;color:rgba(255,255,255,.28);text-align:center;">We'll bring physical flake samples to your home — free, no commitment.</p>
-          <a href="index.html#flakes" style="display:flex;align-items:center;justify-content:center;gap:.4rem;color:rgba(255,255,255,.35);font-size:.8rem;font-weight:600;text-decoration:none;transition:color .2s;" onmouseover="this.style.color='rgba(255,255,255,.65)'" onmouseout="this.style.color='rgba(255,255,255,.35)'">
-            View full color chart on site →
-          </a>
         </div>
       </div>
 
@@ -268,134 +191,254 @@
   </div>
 </section>
 
-<style>
-  @media(min-width:900px){ #viz-grid { grid-template-columns: 3fr 2fr; } }
-</style>
-
 <script>
-  /* ── Color data matched to flakes.png ── */
-  const COLORS = [
-    // Signature Blends (dark charcoal range)
-    { id:'carbon',         name:'Carbon',          hex:'#252525', cat:'signature', desc:'True black charcoal with fine silver and white flakes scattered throughout. Our darkest, most dramatic option — a showroom floor by definition.' },
-    { id:'charcoal-storm', name:'Charcoal Storm',  hex:'#3c3c3c', cat:'signature', desc:'Our most popular blend. Deep charcoal with silver and white flakes — the perfect balance of dark drama and everyday practicality. Works in any garage.' },
-    { id:'ironwood',       name:'Ironwood',         hex:'#4a3c30', cat:'signature', desc:'Dark charcoal with warm brown undertones. Rich and earthy — pairs beautifully with wood beams, stone, and Colorado mountain interiors.' },
+/* ── Data ── */
+const COLORS = [
+  // Signature Blends
+  { id:'gravel',      name:'Gravel',       file:'flake-gravel.jpg',      cat:'signature', desc:'Classic gray, silver, and white mix. Clean and neutral — the most universally flattering floor for any garage.' },
+  { id:'silverton',   name:'Silverton',    file:'flake-silverton.jpg',   cat:'signature', desc:'High-contrast black and white chips with dark accents. Bold, graphic, and dramatic.' },
+  { id:'wombat',      name:'Wombat',       file:'flake-wombat.jpg',      cat:'signature', desc:'Charcoal and gray blend with subtle warm undertones. Refined and understated.' },
+  { id:'creekbed',    name:'Creekbed',     file:'flake-creekbed.jpg',    cat:'signature', desc:'Earthy brown, tan, and cream. A natural, organic look that pairs with stone, wood, and mountain homes.' },
+  { id:'cabin-fever', name:'Cabin Fever',  file:'flake-cabin-fever.jpg', cat:'signature', desc:'Warm tan and beige chips with dark accents. Earthy and inviting — perfect for Colorado mountain cabins.' },
+  { id:'shoreline',   name:'Shoreline',    file:'flake-shoreline.jpg',   cat:'signature', desc:'Light beige and cream with natural variation. Bright and open, like sand — makes any space feel larger.' },
+  { id:'tidal-wave',  name:'Tidal Wave',   file:'flake-tidal-wave.jpg',  cat:'signature', desc:'Cool gray and blue-gray tones. Calm and clean — a modern mountain look that pairs with everything.' },
+  { id:'steamboat',   name:'Steamboat',    file:'flake-steamboat.jpg',   cat:'signature', desc:'Bold blue, black, and white flakes. Our hometown blend — distinctive and full of character. Nothing else like it.' },
+  { id:'nightfall',   name:'Nightfall',    file:'flake-nightfall.jpg',   cat:'signature', desc:'Deep charcoal and dark gray. Sophisticated and sleek — makes everything else in the garage pop.' },
+  // Marble Blends
+  { id:'ash',    name:'Ash',   file:'flake-ash.jpg',   cat:'marble', desc:'Light gray with very fine marble flakes for a polished, refined look. Elegant and clean — like polished concrete.' },
+  { id:'slate',  name:'Slate', file:'flake-slate.jpg', cat:'marble', desc:'Medium gray marble blend. Timeless, versatile, and works in any setting from modern to rustic.' },
+  { id:'briar',  name:'Briar', file:'flake-briar.jpg', cat:'marble', desc:'Warm gray and brown marble tones. Earthy yet refined — brings warmth to the space without going full brown.' },
+  // Stone Blends
+  { id:'juneau',   name:'Juneau',   file:'flake-juneau.jpg',   cat:'stone', desc:'Very light, almost white — bright and airy with a fine, high-end stone texture. Makes any garage feel like a finished space.' },
+  { id:'husky',    name:'Husky',    file:'flake-husky.jpg',    cat:'stone', desc:'Light gray and white chips with a natural stone feel. Clean, neutral, and endlessly versatile.' },
+  { id:'denali',   name:'Denali',   file:'flake-denali.jpg',   cat:'stone', desc:'Medium-dark gray with cool tones. Named for the mountain — strong, enduring, and quietly impressive.' },
+  { id:'acadia',   name:'Acadia',   file:'flake-acadia.jpg',   cat:'stone', desc:'Warm tan and cream with natural variation. Soft and inviting — the kind of floor that makes your garage feel like a room.' },
+  { id:'klondike', name:'Klondike', file:'flake-klondike.jpg', cat:'stone', desc:'White and cream base with a distinctive purple accent chip. Striking and unexpected — for the homeowner who wants something truly unique.' },
+  { id:'cascade',  name:'Cascade',  file:'flake-cascade.jpg',  cat:'stone', desc:'Warm tan, brown, and beige tones. Natural and organic — like Colorado sandstone underfoot.' },
+];
 
-    // Marble Blends
-    { id:'alpine-white',   name:'Alpine White',    hex:'#ccc9c0', cat:'marble', desc:'Bright white with warm pearl and gray flakes. Clean, airy, and luminous — opens up any space and makes the craftsmanship stand out.' },
-    { id:'steel',          name:'Steel',            hex:'#5d7090', cat:'marble', desc:'Cool blue-gray with multi-tone marble flakes. Modern and refined — the choice for homeowners who want something that looks like polished stone.' },
-    { id:'midnight',       name:'Midnight',         hex:'#1a1f2a', cat:'marble', desc:'Very dark navy with subtle dark blue and silver flakes. Almost black with a cool depth to it. Pairs beautifully with modern or industrial aesthetics.' },
+/* ── Floor polygon (normalized 0–1 coords) ── */
+// Default sample: garage shot ~57% down where wall meets floor
+const FLOOR_POLY_DEFAULT = [[0.0,0.57],[1.0,0.53],[1.0,1.0],[0.0,1.0]];
+// User upload: generic bottom portion
+const FLOOR_POLY_UPLOAD  = [[0.0,0.46],[1.0,0.46],[1.0,1.0],[0.0,1.0]];
 
-    // Stone Blends (natural, lighter range)
-    { id:'coastal',        name:'Coastal',          hex:'#d8d0ba', cat:'stone', desc:'Very light cream with neutral beige flakes. The lightest, brightest option — like polished limestone. Makes any garage feel like a finished living space.' },
-    { id:'sandstone',      name:'Sandstone',        hex:'#c0a470', cat:'stone', desc:'Warm tan-gold with sandy flakes. Natural and inviting — brings a Colorado outdoors feel inside. A favorite for mountain vacation homes.' },
-    { id:'bluestone',      name:'Bluestone',        hex:'#7e8ea0', cat:'stone', desc:'Cool slate-blue gray with textured stone flakes. Distinctly Colorado — like crushed mountain slate. Pairs perfectly with log cabin and modern chalet aesthetics.' },
-    { id:'canyon',         name:'Canyon',           hex:'#9c6e50', cat:'stone', desc:'Warm russet-brown with earthy flakes. Rich, grounded, and distinctive. If you want a warm, western feel underfoot — this is it.' },
-    { id:'pebble',         name:'Pebble',           hex:'#c8bea4', cat:'stone', desc:'Light warm gray-beige with fine natural flakes. Subtle and versatile — works in any space without competing with the rest of the room.' },
-    { id:'slate',          name:'Slate',            hex:'#6a7880', cat:'stone', desc:'Medium cool gray-blue with layered stone flakes. Classic and clean — looks equally at home in a ski chalet or a modern mountain build.' },
-  ];
+/* ── State ── */
+let active      = COLORS[0];
+let category    = 'all';
+let garageImg   = null;
+let isUpload    = false;
+let isComparing = false;
+let floorPoly   = FLOOR_POLY_DEFAULT;
+const texCache  = {};
 
-  let active = COLORS[0];
-  let category = 'all';
-  let isUpload = false;
+/* ── Image loading ── */
+function loadImg(src) {
+  if (texCache[src]) return Promise.resolve(texCache[src]);
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload  = () => { texCache[src] = img; res(img); };
+    img.onerror = rej;
+    img.src = src;
+  });
+}
 
-  function hexToRgb(hex) {
-    return {
-      r: parseInt(hex.slice(1,3),16),
-      g: parseInt(hex.slice(3,5),16),
-      b: parseInt(hex.slice(5,7),16)
-    };
-  }
+/* ── Canvas setup ── */
+function setupCanvas(img) {
+  const canvas = document.getElementById('floorCanvas');
+  canvas.width  = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  return canvas;
+}
 
-  function catLabel(cat) {
-    return cat === 'signature' ? 'Signature Blend' : cat === 'marble' ? 'Marble Series' : 'Stone Blend';
-  }
+/* ── Rendering ── */
+function drawBase(ctx, img) {
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.filter = 'brightness(1.1) contrast(1.03)';
+  ctx.drawImage(img, 0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.filter = 'none';
+}
 
-  function selectColor(color) {
-    active = color;
-    const { r, g, b } = hexToRgb(color.hex);
-    const overlay = document.getElementById('floor-overlay');
-    overlay.style.backgroundColor = `rgba(${r},${g},${b},0.88)`;
+function clipToFloor(ctx, poly, W, H) {
+  ctx.beginPath();
+  poly.forEach(([nx, ny], i) => {
+    const x = nx * W, y = ny * H;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.closePath();
+  ctx.clip();
+}
 
-    document.getElementById('info-pip').style.background = color.hex;
-    document.getElementById('badge-chip').style.background = color.hex;
-    document.getElementById('info-name').textContent = color.name;
-    document.getElementById('badge-name').textContent = color.name;
-    document.getElementById('info-cat').textContent = catLabel(color.cat);
-    document.getElementById('color-desc').textContent = color.desc;
+async function render(colorId, compare) {
+  const canvas = document.getElementById('floorCanvas');
+  const ctx    = canvas.getContext('2d');
+  const W      = canvas.width;
+  const H      = canvas.height;
 
-    document.querySelectorAll('.swatch-item').forEach(el => el.classList.remove('active'));
-    const el = document.getElementById('sw-' + color.id);
-    if (el) el.classList.add('active');
-  }
+  drawBase(ctx, garageImg);
+  if (compare) return; // just show original
 
-  function renderSwatches() {
-    const grid = document.getElementById('swatch-grid');
-    grid.innerHTML = '';
-    const list = category === 'all' ? COLORS : COLORS.filter(c => c.cat === category);
-    list.forEach(color => {
-      const item = document.createElement('div');
-      item.className = 'swatch-item' + (color.id === active.id ? ' active' : '');
-      item.id = 'sw-' + color.id;
-      item.setAttribute('role','button');
-      item.setAttribute('aria-label', color.name);
-      item.onclick = () => selectColor(color);
-      item.innerHTML = `
-        <div class="swatch-chip" style="background:${color.hex};">
-          <div class="swatch-check">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
-          </div>
+  const color = COLORS.find(c => c.id === colorId) || COLORS[0];
+  let flakeImg;
+  try {
+    flakeImg = await loadImg(color.file);
+  } catch(e) { return; }
+
+  // Build tiled pattern at 220px tile size for a natural floor scale
+  const TILE = 220;
+  const offscreen = document.createElement('canvas');
+  offscreen.width = offscreen.height = TILE;
+  const oc = offscreen.getContext('2d');
+  oc.drawImage(flakeImg, 0, 0, TILE, TILE);
+  const pattern = ctx.createPattern(offscreen, 'repeat');
+
+  ctx.save();
+  clipToFloor(ctx, floorPoly, W, H);
+
+  // Fill floor with actual flake texture
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 1;
+  // Slight rotation to break up tiling regularity
+  const cx = W / 2, cy = H / 2;
+  ctx.translate(cx, cy);
+  ctx.rotate(3 * Math.PI / 180);
+  ctx.translate(-cx, -cy);
+  ctx.fillStyle = pattern;
+  ctx.fillRect(-50, 0, W + 100, H); // wider to cover rotation bleed
+  ctx.setTransform(1,0,0,1,0,0);    // reset transform inside save/restore
+
+  // Overlay original floor's lighting & shadows using multiply
+  ctx.globalCompositeOperation = 'multiply';
+  ctx.globalAlpha = 0.38;
+  ctx.filter = 'brightness(1.15) contrast(1.1) saturate(0)';
+  ctx.drawImage(garageImg, 0, 0, W, H);
+  ctx.filter = 'none';
+
+  ctx.restore();
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+/* ── Trigger render ── */
+async function applyColor(color) {
+  active = color;
+  updateUI(color);
+
+  showLoading(true);
+  await render(color.id, false);
+  showLoading(false);
+}
+
+function showLoading(on) {
+  document.getElementById('canvas-loading').style.display = on ? 'flex' : 'none';
+}
+
+function updateUI(color) {
+  const file = color.file;
+  document.getElementById('info-thumb').style.backgroundImage  = `url('${file}')`;
+  document.getElementById('badge-thumb').style.backgroundImage = `url('${file}')`;
+  document.getElementById('badge-name').textContent  = color.name;
+  document.getElementById('info-name').textContent   = color.name;
+  document.getElementById('info-cat').textContent    = catLabel(color.cat);
+  document.getElementById('color-desc').textContent  = color.desc;
+  document.querySelectorAll('.swatch-item').forEach(el => el.classList.remove('active'));
+  const sw = document.getElementById('sw-' + color.id);
+  if (sw) sw.classList.add('active');
+}
+
+function catLabel(cat) {
+  return cat === 'signature' ? 'Signature Blend' : cat === 'marble' ? 'Marble Blend' : 'Stone Blend';
+}
+
+/* ── Swatches ── */
+function renderSwatches() {
+  const grid = document.getElementById('swatch-grid');
+  grid.innerHTML = '';
+  const list = category === 'all' ? COLORS : COLORS.filter(c => c.cat === category);
+  list.forEach(color => {
+    const item = document.createElement('div');
+    item.className = 'swatch-item' + (color.id === active.id ? ' active' : '');
+    item.id = 'sw-' + color.id;
+    item.setAttribute('aria-label', color.name);
+    item.onclick = () => applyColor(color);
+    item.innerHTML = `
+      <div class="swatch-chip" style="background-image:url('${color.file}');">
+        <div class="swatch-check">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
         </div>
-        <div class="swatch-name">${color.name}</div>`;
-      grid.appendChild(item);
-    });
-  }
+      </div>
+      <div class="swatch-name">${color.name}</div>`;
+    grid.appendChild(item);
+  });
+}
 
-  function setCategory(cat, btn) {
-    category = cat;
-    document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderSwatches();
-  }
-
-  function useSample() {
-    isUpload = false;
-    const shell = document.getElementById('preview-shell');
-    shell.classList.remove('upload-mask');
-    document.getElementById('garage-img').src = 'ba-b1-new.png';
-    document.getElementById('btn-sample').classList.add('active');
-    document.getElementById('btn-upload').classList.remove('active');
-    document.getElementById('tip-text').textContent = 'Color preview applied to floor area using the sample photo. Hold Compare to see original concrete.';
-  }
-
-  function handleUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    isUpload = true;
-    const url = URL.createObjectURL(file);
-    document.getElementById('garage-img').src = url;
-    const shell = document.getElementById('preview-shell');
-    shell.classList.add('upload-mask');
-    document.getElementById('btn-upload').classList.add('active');
-    document.getElementById('btn-sample').classList.remove('active');
-    document.getElementById('tip-text').textContent = 'Color applied to the lower portion of your photo — the most likely floor area. Best with a photo taken from the garage doorway looking in.';
-  }
-
-  function startCompare(e) {
-    if (e) e.preventDefault();
-    document.getElementById('preview-shell').classList.add('compare-active');
-    document.getElementById('compare-btn').style.background = 'rgba(255,255,255,.15)';
-    document.getElementById('compare-btn').style.color = '#fff';
-  }
-  function endCompare() {
-    document.getElementById('preview-shell').classList.remove('compare-active');
-    document.getElementById('compare-btn').style.background = '';
-    document.getElementById('compare-btn').style.color = '';
-  }
-
-  // Init
+function setCategory(cat, btn) {
+  category = cat;
+  document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
   renderSwatches();
-  selectColor(active);
-</script>
+}
 
+/* ── Source switching ── */
+async function loadGarage(src, poly, isSample) {
+  showLoading(true);
+  try {
+    garageImg = await loadImg(src);
+    floorPoly = poly;
+    isUpload  = !isSample;
+    setupCanvas(garageImg);
+    await render(active.id, false);
+    document.getElementById('btn-sample').classList.toggle('active', isSample);
+    document.getElementById('btn-upload').classList.toggle('active', !isSample);
+    document.getElementById('tip-text').textContent = isSample
+      ? 'Actual flake texture rendered on the floor area. Hold Compare to see the original concrete.'
+      : 'Color applied to the lower portion — works best with photos taken from the garage doorway.';
+  } finally {
+    showLoading(false);
+  }
+}
+
+function useSample() {
+  loadGarage('ba-b1-new.png', FLOOR_POLY_DEFAULT, true);
+}
+
+function handleUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  loadGarage(url, FLOOR_POLY_UPLOAD, false);
+}
+
+/* ── Compare ── */
+function startCompare(e) {
+  if (e) e.preventDefault();
+  isComparing = true;
+  const canvas = document.getElementById('floorCanvas');
+  const ctx = canvas.getContext('2d');
+  drawBase(ctx, garageImg);
+  document.getElementById('btn-compare').classList.add('active');
+}
+function endCompare() {
+  if (!isComparing) return;
+  isComparing = false;
+  document.getElementById('btn-compare').classList.remove('active');
+  render(active.id, false);
+}
+
+/* ── Init ── */
+async function init() {
+  renderSwatches();
+  showLoading(true);
+  try {
+    garageImg = await loadImg('ba-b1-new.png');
+    setupCanvas(garageImg);
+    await render(active.id, false);
+    updateUI(active);
+  } finally {
+    showLoading(false);
+  }
+}
+init();
+</script>
 </body>
 </html>
