@@ -283,8 +283,7 @@ void main() {
   vec3 tc = u_H * vec3(iuv, 1.0);
   vec2 fc = tc.xy / tc.z;             /* floor UV: 0=back-left, 1=front-right */
 
-  /* Stochastic tiling: blend 4 neighbor tiles with per-tile random UV offsets.
-     Eliminates the visible repeating grid with zero seam artifacts. */
+  /* Stochastic tiling — 90% pure zone, blend only in a thin 10% border seam */
   vec2 tileId = floor(fc * u_tiles);
   vec2 tileUV = fract(fc * u_tiles);
 
@@ -298,42 +297,34 @@ void main() {
   vec4 f01 = texture2D(u_flake, tileUV + o01);
   vec4 f11 = texture2D(u_flake, tileUV + o11);
 
-  /* Sharper blend — keeps a large "pure" zone per tile (less blur, still seamless) */
-  vec2 bw = smoothstep(0.25, 0.75, tileUV);
+  /* Blend only in the outermost 5% of each tile — chips stay sharp */
+  vec2 bw = smoothstep(0.45, 0.55, tileUV);
   vec4 flake = mix(mix(f00, f10, bw.x), mix(f01, f11, bw.x), bw.y);
 
-  /* ── Luminance of original floor (shadow / lighting map) ── */
+  /* Floor luminance drives shadow/lighting on the coating */
   float lum = dot(orig.rgb, vec3(0.299, 0.587, 0.114));
 
-  /* ── 1. Start with flake texture (base coat covers concrete) ── */
+  /* Fully opaque epoxy coat.
+     Shadow from original floor gives lighting depth. Clamp so chip colors
+     read true — epoxy covers stains so floor looks cleaner than bare concrete. */
   vec3 c = flake.rgb;
+  /* Baseline ~0.57: median luminance of ba-a1.jpg epoxy floor */
+  float shadow = clamp(lum / 0.57, 0.80, 1.25);
+  c = c * shadow;
 
-  /* ── 2. Soft-light blend: preserves floor's light/shadow gradient ── */
-  c.r = softLight(c.r, lum);
-  c.g = softLight(c.g, lum);
-  c.b = softLight(c.b, lum);
-  c = mix(flake.rgb, c, 0.65);
-
-  /* ── 3. Multiply: deepens shadows from original floor ── */
-  float shadow = pow(lum, 0.8);
-  c = mix(c, c * shadow * 1.2, 0.3);
-
-  /* ── 4. Polyaspartic gloss: Fresnel near horizon + spot specular ── */
-  /* Fresnel: grazing angle at far end of floor (back wall) */
+  /* Polyaspartic gloss: Fresnel near back wall + spot specular */
   float yNorm  = (iuv.y - u_poly[0].y) / max(1.0 - u_poly[0].y, 0.001);
-  float fresnel = pow(max(0.0, 1.0 - yNorm), 2.5) * 0.09;
-  /* Spot specular: light from upper-left (typical for garage-door-open shot) */
-  float specD  = length(iuv - vec2(0.18, 0.42));
-  float spec   = pow(max(0.0, 1.0 - specD * 5.5), 5.0) * 0.18;
+  float fresnel = pow(max(0.0, 1.0 - yNorm), 3.0) * 0.12;
+  float specD  = length(iuv - vec2(0.2, 0.4));
+  float spec   = pow(max(0.0, 1.0 - specD * 5.0), 6.0) * 0.22;
   c += fresnel + spec;
 
-  /* ── 5. Micro-roughness variation (prevents flat plastic look) ── */
-  float rough = (hash(fc * 55.0 + 0.77) - 0.5) * 0.022;
-  c += rough;
+  /* Micro-roughness */
+  c += (hash(fc * 55.0 + 0.77) - 0.5) * 0.016;
 
-  /* ── 6. Edge fade: softer at back wall, tight at front and sides ── */
-  float fadeX  = smoothstep(0.0, 0.04, fc.x) * smoothstep(1.0, 0.96, fc.x);
-  float fadeY  = smoothstep(0.0, 0.07, fc.y) * smoothstep(1.0, 0.99, fc.y);
+  /* Anti-alias only — coating goes hard to polygon edge */
+  float fadeX = smoothstep(0.0, 0.008, fc.x) * smoothstep(1.0, 0.992, fc.x);
+  float fadeY = smoothstep(0.0, 0.008, fc.y) * smoothstep(1.0, 0.992, fc.y);
   c = mix(orig.rgb, c, fadeX * fadeY);
 
   gl_FragColor = vec4(clamp(c, 0.0, 1.0), 1.0);
@@ -368,7 +359,8 @@ const COLORS = [
 
 /* ── Floor polygons [back-left, back-right, front-right, front-left] image UV (Y-down) ── */
 /* CW winding when drawn in standard image coords */
-const POLY_SAMPLE = [[0.08, 0.37], [0.92, 0.37], [1.00, 1.00], [0.00, 1.00]];
+/* ba-a1.jpg = same garage, epoxy already applied — use it as base so coverage is naturally wall-to-wall */
+const POLY_SAMPLE = [[0.04, 0.35], [0.90, 0.35], [1.00, 0.89], [0.00, 0.89]];
 const POLY_UPLOAD = [[0.10, 0.46], [0.90, 0.46], [1.00, 1.00], [0.00, 1.00]];
 
 /* ── State ── */
@@ -494,7 +486,7 @@ function render() {
   gl.uniform2fv(locs.poly,  new Float32Array(floorPoly.flat()));
   gl.uniformMatrix3fv(locs.H, false, polyToColumnMajorMat3(H));
   gl.uniform1f(locs.slider,  sliderX);
-  gl.uniform1f(locs.tiles,   10.0);  /* tiles across floor width */
+  gl.uniform1f(locs.tiles,   14.0);
   gl.uniform1f(locs.compare, compareOn ? 1.0 : 0.0);
 
   /* Bind textures */
@@ -610,7 +602,7 @@ function useSample() {
   document.getElementById('btn-sample').classList.add('active');
   document.getElementById('btn-upload').classList.remove('active');
   document.getElementById('tip-text').textContent = 'Perspective-correct rendering with shadow & lighting preservation. Hold Compare to see original concrete.';
-  setGarage('ba-b1.jpg', POLY_SAMPLE);
+  setGarage('ba-a1.jpg', POLY_SAMPLE);
 }
 
 async function handleUpload(e) {
@@ -783,7 +775,7 @@ async function init() {
   showLoading(true);
   try {
     flakeTex = await loadFlakeTex(activeColor.file);
-    await setGarage('ba-b1.jpg', POLY_SAMPLE);
+    await setGarage('ba-a1.jpg', POLY_SAMPLE);
   } finally { showLoading(false); }
 }
 
