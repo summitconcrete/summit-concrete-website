@@ -4,75 +4,90 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Floor Color Visualizer | Summit Concrete Finishes</title>
-  <meta name="description" content="See your garage floor in any epoxy flake color before you commit. Upload your own photo or use our sample garage.">
+  <meta name="description" content="Preview any epoxy flake blend on your garage floor. Perspective-correct rendering, realistic shadows, polyaspartic gloss.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    :root {
-      --navy-dark: #0d1825;
-      --green:     #79b52f;
-      --green-lt:  #8fc73e;
-      --charcoal:  #141414;
-      --dark:      #1c1c1c;
-    }
+    :root { --navy: #0d1825; --green: #79b52f; --green-lt: #8fc73e; --charcoal: #141414; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Inter', sans-serif; background: var(--charcoal); -webkit-font-smoothing: antialiased; }
     .font-display { font-family: 'Barlow Condensed', sans-serif; }
 
-    nav { background: var(--navy-dark); border-bottom: 1px solid rgba(121,181,47,.12); position: sticky; top: 0; z-index: 100; }
+    nav { background: var(--navy); border-bottom: 1px solid rgba(121,181,47,.12); position: sticky; top: 0; z-index: 100; }
     .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; height: 76px; display: flex; align-items: center; justify-content: space-between; }
     .nav-back { display: inline-flex; align-items: center; gap: .45rem; color: rgba(255,255,255,.5); font-size: .8rem; font-weight: 600; text-decoration: none; transition: color .2s; }
     .nav-back:hover { color: #fff; }
-    .nav-cta { display: inline-flex; align-items: center; gap: .4rem; background: var(--green); color: #fff; font-weight: 700; font-size: .85rem; padding: .55rem 1.1rem; border-radius: 8px; text-decoration: none; }
+    .nav-cta { background: var(--green); color: #fff; font-weight: 700; font-size: .85rem; padding: .55rem 1.1rem; border-radius: 8px; text-decoration: none; transition: background .15s; }
     .nav-cta:hover { background: var(--green-lt); }
 
-    /* Canvas preview */
-    .preview-shell { position: relative; border-radius: 14px; overflow: hidden; background: #0a0a0a; line-height: 0; box-shadow: 0 4px 40px rgba(0,0,0,.7); }
-    #floorCanvas { width: 100%; height: auto; display: block; }
+    /* Controls */
+    .ctrl-btn { display: inline-flex; align-items: center; gap: .4rem; padding: .5rem .9rem; border-radius: 8px; font-size: .78rem; font-weight: 600; border: 1.5px solid rgba(255,255,255,.1); color: rgba(255,255,255,.45); background: rgba(255,255,255,.04); cursor: pointer; transition: all .18s; white-space: nowrap; }
+    .ctrl-btn:hover { color: rgba(255,255,255,.75); border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.08); }
+    .ctrl-btn.active { background: rgba(121,181,47,.12); border-color: rgba(121,181,47,.5); color: var(--green); }
 
-    /* Loading spinner over canvas */
-    .canvas-loading { position: absolute; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; }
+    /* Canvas wrapper */
+    #preview-wrap { position: relative; border-radius: 14px; overflow: hidden; background: #0a0a0a; line-height: 0; box-shadow: 0 4px 40px rgba(0,0,0,.7); cursor: crosshair; }
+    #viz-canvas { display: block; width: 100%; height: auto; }
+
+    /* Corner handles */
+    .corner-handle {
+      position: absolute; width: 20px; height: 20px; border-radius: 50%;
+      background: #fff; border: 2.5px solid var(--green);
+      box-shadow: 0 2px 8px rgba(0,0,0,.6);
+      transform: translate(-50%,-50%); cursor: grab; z-index: 20;
+      transition: transform .12s, box-shadow .12s;
+      display: none;
+    }
+    .corner-handle:active { cursor: grabbing; transform: translate(-50%,-50%) scale(1.3); box-shadow: 0 4px 16px rgba(121,181,47,.5); }
+    .handles-visible .corner-handle { display: block; }
+
+    /* Floor overlay polygon (visual guide) */
+    #floor-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 15; display: none; }
+    .handles-visible #floor-overlay { display: block; }
+
+    /* Compare slider */
+    #cmp-line { position: absolute; top: 0; bottom: 0; width: 2px; background: #fff; z-index: 25; pointer-events: none; display: none; }
+    #cmp-line::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 36px; height: 36px; border-radius: 50%; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.5); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M9 18l-6-6 6-6M15 6l6 6-6 6'/%3E%3C/svg%3E"); background-size: 20px; background-position: center; background-repeat: no-repeat; }
+    #preview-wrap.compare-mode { cursor: ew-resize; }
+    #preview-wrap.compare-mode #cmp-line { display: block; }
+
+    /* Loading */
+    #loading-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; z-index: 30; border-radius: 14px; }
+    #loading-overlay.on { display: flex; }
     .spinner { width: 36px; height: 36px; border: 3px solid rgba(255,255,255,.15); border-top-color: var(--green); border-radius: 50%; animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Control buttons */
-    .ctrl-btn { display: inline-flex; align-items: center; gap: .45rem; padding: .55rem 1rem; border-radius: 8px; font-size: .8rem; font-weight: 600; border: 1.5px solid rgba(255,255,255,.1); color: rgba(255,255,255,.45); background: rgba(255,255,255,.04); cursor: pointer; transition: all .2s; }
-    .ctrl-btn:hover { background: rgba(255,255,255,.09); color: rgba(255,255,255,.75); border-color: rgba(255,255,255,.18); }
-    .ctrl-btn.active { background: rgba(121,181,47,.12); border-color: rgba(121,181,47,.5); color: var(--green); }
+    /* Color badge */
+    #color-badge { position: absolute; bottom: 12px; right: 12px; display: flex; align-items: center; gap: .5rem; background: rgba(0,0,0,.65); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.1); border-radius: 8px; padding: .4rem .75rem; pointer-events: none; z-index: 20; }
+    #badge-thumb { width: 16px; height: 16px; border-radius: 3px; background-size: cover; flex-shrink: 0; }
+    #badge-name { font-size: .72rem; font-weight: 700; color: #fff; }
+
+    /* Info bar */
+    .info-bar { display: flex; align-items: center; gap: .85rem; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; padding: .8rem 1rem; margin-top: .85rem; }
+    #info-thumb { width: 42px; height: 42px; border-radius: 6px; background-size: cover; background-position: center; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,.5); }
 
     /* Category tabs */
-    .cat-tab { padding: .4rem 1rem; border-radius: 100px; font-size: .78rem; font-weight: 700; border: 1.5px solid rgba(255,255,255,.1); color: rgba(255,255,255,.4); background: none; cursor: pointer; transition: all .2s; white-space: nowrap; }
-    .cat-tab:hover { border-color: rgba(255,255,255,.2); color: rgba(255,255,255,.65); }
+    .cat-tab { padding: .4rem 1rem; border-radius: 100px; font-size: .78rem; font-weight: 700; border: 1.5px solid rgba(255,255,255,.1); color: rgba(255,255,255,.4); background: none; cursor: pointer; transition: all .18s; white-space: nowrap; }
+    .cat-tab:hover { border-color: rgba(255,255,255,.25); color: rgba(255,255,255,.65); }
     .cat-tab.active { background: var(--green); color: #fff; border-color: var(--green); }
 
     /* Swatch grid */
     .swatch-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; }
-    @media(min-width:480px){ .swatch-grid { grid-template-columns: repeat(4, 1fr); } }
-    @media(min-width:900px){ .swatch-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media(min-width:480px){ .swatch-grid { grid-template-columns: repeat(4,1fr); } }
+    @media(min-width:900px){ .swatch-grid { grid-template-columns: repeat(3,1fr); } }
+    .swatch-item { display: flex; flex-direction: column; align-items: center; gap: .35rem; cursor: pointer; }
+    .swatch-chip { width:100%; aspect-ratio:1; border-radius:7px; border:2.5px solid transparent; overflow:hidden; background-size:cover; background-position:center; transition:transform .15s cubic-bezier(.22,1,.36,1),border-color .15s,box-shadow .15s; position:relative; }
+    .swatch-item:hover .swatch-chip { transform:scale(1.06); box-shadow:0 4px 16px rgba(0,0,0,.5); }
+    .swatch-item.active .swatch-chip { border-color:var(--green); box-shadow:0 0 0 3px rgba(121,181,47,.3); transform:scale(1.06); }
+    .swatch-check { display:none; position:absolute; inset:0; background:rgba(121,181,47,.35); align-items:center; justify-content:center; }
+    .swatch-item.active .swatch-check { display:flex; }
+    .swatch-name { font-size:.65rem; font-weight:600; color:rgba(255,255,255,.4); text-align:center; }
+    .swatch-item:hover .swatch-name { color:rgba(255,255,255,.7); }
+    .swatch-item.active .swatch-name { color:var(--green); }
 
-    .swatch-item { display: flex; flex-direction: column; align-items: center; gap: .4rem; cursor: pointer; }
-    .swatch-chip {
-      width: 100%; aspect-ratio: 1; border-radius: 8px;
-      border: 2.5px solid transparent; overflow: hidden;
-      background-size: cover; background-position: center;
-      transition: transform .15s cubic-bezier(.22,1,.36,1), border-color .15s, box-shadow .15s;
-      position: relative;
-    }
-    .swatch-item:hover .swatch-chip { transform: scale(1.06); box-shadow: 0 4px 16px rgba(0,0,0,.5); }
-    .swatch-item.active .swatch-chip { border-color: var(--green); box-shadow: 0 0 0 3px rgba(121,181,47,.3); transform: scale(1.06); }
-    .swatch-check { display: none; position: absolute; inset: 0; background: rgba(121,181,47,.35); align-items: center; justify-content: center; }
-    .swatch-item.active .swatch-check { display: flex; }
-    .swatch-name { font-size: .67rem; font-weight: 600; color: rgba(255,255,255,.4); text-align: center; line-height: 1.3; }
-    .swatch-item:hover .swatch-name { color: rgba(255,255,255,.7); }
-    .swatch-item.active .swatch-name { color: var(--green); }
-
-    /* Info bar */
-    .info-bar { display: flex; align-items: center; gap: .85rem; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 10px; padding: .8rem 1rem; margin-top: .85rem; }
-    .info-thumb { width: 42px; height: 42px; border-radius: 6px; background-size: cover; background-position: center; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,.5); }
-
-    @media(min-width:900px){ .picker-sticky { position: sticky; top: 90px; } }
+    @media(min-width:900px){ #picker-sticky { position:sticky; top:90px; } }
     @media(min-width:900px){ #viz-grid { grid-template-columns: 3fr 2fr; } }
   </style>
 </head>
@@ -94,96 +109,97 @@
   </div>
 </nav>
 
-<div style="background:var(--navy-dark);padding:3rem 1.5rem 2.5rem;border-bottom:1px solid rgba(255,255,255,.04);">
+<div style="background:var(--navy);padding:2.5rem 1.5rem 2rem;border-bottom:1px solid rgba(255,255,255,.04);">
   <div style="max-width:860px;margin:0 auto;text-align:center;">
-    <p style="font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:.6rem;">Interactive Floor Visualizer</p>
-    <h1 class="font-display" style="font-size:clamp(2.2rem,6vw,3.75rem);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.04;margin-bottom:.9rem;">See Your Floor Before<br>You Commit</h1>
-    <p style="color:rgba(255,255,255,.45);font-size:.9rem;line-height:1.8;max-width:480px;margin:0 auto;">Upload a photo of your garage or use our sample. Click any blend to preview the actual flake system on your floor.</p>
+    <p style="font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:.5rem;">Interactive Floor Visualizer</p>
+    <h1 class="font-display" style="font-size:clamp(2rem,6vw,3.5rem);font-weight:900;color:#fff;letter-spacing:-.03em;line-height:1.04;margin-bottom:.75rem;">See Your Floor Before You Commit</h1>
+    <p style="color:rgba(255,255,255,.45);font-size:.88rem;line-height:1.8;max-width:460px;margin:0 auto;">Click any blend to preview it on the floor with perspective-correct rendering. Upload your own garage photo or use our sample.</p>
   </div>
 </div>
 
-<section style="padding:2.5rem 1.5rem 5rem;">
+<section style="padding:2rem 1.5rem 5rem;">
   <div style="max-width:1160px;margin:0 auto;">
     <div style="display:grid;gap:2rem;align-items:start;" id="viz-grid">
 
-      <!-- LEFT: Canvas preview -->
+      <!-- LEFT: WebGL preview -->
       <div>
-        <!-- Controls -->
-        <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.9rem;">
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.85rem;align-items:center;">
           <button class="ctrl-btn active" id="btn-sample" onclick="useSample()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
             Sample Garage
           </button>
           <label class="ctrl-btn" id="btn-upload" style="cursor:pointer;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Upload Your Photo
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload Photo
             <input type="file" accept="image/*" style="display:none;" onchange="handleUpload(event)">
           </label>
-          <button class="ctrl-btn" id="btn-compare"
-            onmousedown="startCompare()" onmouseup="endCompare()"
-            ontouchstart="startCompare(event)" ontouchend="endCompare()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3H5a2 2 0 00-2 2v14a2 2 0 002 2h3M16 3h3a2 2 0 012 2v14a2 2 0 01-2 2h-3M12 3v18"/></svg>
-            Hold to Compare
+          <button class="ctrl-btn" id="btn-handles" onclick="toggleHandles()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+            Adjust Floor Area
           </button>
-        </div>
-
-        <!-- Canvas -->
-        <div class="preview-shell" id="preview-shell">
-          <canvas id="floorCanvas"></canvas>
-          <div class="canvas-loading" id="canvas-loading" style="display:none;">
-            <div class="spinner"></div>
-          </div>
-          <!-- Corner badge -->
-          <div id="color-badge" style="position:absolute;bottom:12px;right:12px;display:flex;align-items:center;gap:.5rem;background:rgba(0,0,0,.65);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:.4rem .75rem;pointer-events:none;">
-            <div id="badge-thumb" style="width:16px;height:16px;border-radius:3px;background-size:cover;flex-shrink:0;"></div>
-            <span id="badge-name" style="font-size:.72rem;font-weight:700;color:#fff;white-space:nowrap;">Gravel</span>
+          <div style="margin-left:auto;">
+            <button class="ctrl-btn" id="btn-compare"
+              onmousedown="startCompare()" onmouseup="endCompare()"
+              ontouchstart="startCompare(event)" ontouchend="endCompare()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3H5a2 2 0 00-2 2v14a2 2 0 002 2h3M16 3h3a2 2 0 012 2v14a2 2 0 01-2 2h-3M12 3v18"/></svg>
+              Hold to Compare
+            </button>
           </div>
         </div>
 
-        <!-- Info bar -->
+        <div id="preview-wrap">
+          <canvas id="viz-canvas"></canvas>
+          <svg id="floor-overlay" viewBox="0 0 1 1" preserveAspectRatio="none">
+            <polygon id="floor-polygon" fill="rgba(121,181,47,0.08)" stroke="rgba(121,181,47,0.5)" stroke-width="0.003"/>
+          </svg>
+          <div class="corner-handle" id="h0" data-i="0"></div>
+          <div class="corner-handle" id="h1" data-i="1"></div>
+          <div class="corner-handle" id="h2" data-i="2"></div>
+          <div class="corner-handle" id="h3" data-i="3"></div>
+          <div id="cmp-line"></div>
+          <div id="loading-overlay"><div class="spinner"></div></div>
+          <div id="color-badge">
+            <div id="badge-thumb"></div>
+            <span id="badge-name">Gravel</span>
+          </div>
+        </div>
+
         <div class="info-bar">
-          <div class="info-thumb" id="info-thumb"></div>
+          <div id="info-thumb"></div>
           <div style="flex:1;min-width:0;">
             <div style="font-size:.85rem;font-weight:700;color:#f0ede8;" id="info-name">Gravel</div>
             <div style="font-size:.72rem;color:rgba(255,255,255,.38);" id="info-cat">Signature Blend</div>
           </div>
-          <a href="contact.html" style="font-size:.8rem;font-weight:700;color:var(--green);text-decoration:none;flex-shrink:0;">Quote this blend →</a>
+          <a href="contact.html" style="font-size:.78rem;font-weight:700;color:var(--green);text-decoration:none;flex-shrink:0;">Quote this blend →</a>
         </div>
-        <p style="font-size:.7rem;color:rgba(255,255,255,.22);text-align:center;margin-top:.6rem;line-height:1.6;" id="tip-text">
-          Actual flake texture rendered on the floor area. Hold Compare to see the original concrete.
+        <p style="font-size:.68rem;color:rgba(255,255,255,.2);text-align:center;margin-top:.55rem;line-height:1.6;" id="tip-text">
+          Perspective-correct rendering with shadow &amp; lighting preservation. Hold Compare to see original concrete.
         </p>
       </div>
 
       <!-- RIGHT: Color picker -->
-      <div class="picker-sticky">
-        <div style="margin-bottom:1.25rem;">
-          <h2 class="font-display" style="font-size:1.75rem;font-weight:900;color:#f0ede8;letter-spacing:-.02em;margin-bottom:.25rem;">Choose Your Blend</h2>
-          <p style="font-size:.82rem;color:rgba(255,255,255,.38);">Click any blend to see it on your floor.</p>
+      <div id="picker-sticky">
+        <div style="margin-bottom:1.1rem;">
+          <h2 class="font-display" style="font-size:1.75rem;font-weight:900;color:#f0ede8;letter-spacing:-.02em;margin-bottom:.2rem;">Choose Your Blend</h2>
+          <p style="font-size:.8rem;color:rgba(255,255,255,.38);">Click any blend to see it applied.</p>
         </div>
-
-        <div style="display:flex;gap:.45rem;flex-wrap:wrap;margin-bottom:1.25rem;">
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.1rem;">
           <button class="cat-tab active" onclick="setCategory('all',this)">All</button>
           <button class="cat-tab" onclick="setCategory('signature',this)">Signature</button>
           <button class="cat-tab" onclick="setCategory('marble',this)">Marble</button>
           <button class="cat-tab" onclick="setCategory('stone',this)">Stone</button>
         </div>
-
         <div class="swatch-grid" id="swatch-grid"></div>
-
-        <div style="margin-top:1.25rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:1.1rem;">
-          <p style="font-size:.82rem;color:rgba(255,255,255,.5);line-height:1.75;" id="color-desc">
-            Classic gray, silver, and white mix. Clean and neutral — the most universally flattering floor for any garage.
-          </p>
+        <div style="margin-top:1.1rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:1rem;">
+          <p style="font-size:.8rem;color:rgba(255,255,255,.5);line-height:1.75;" id="color-desc">Classic gray, silver, and white mix. Clean and neutral — the most universally flattering floor for any garage.</p>
         </div>
-
-        <div style="height:1px;background:rgba(255,255,255,.07);margin:1.5rem 0;"></div>
-
-        <div style="display:flex;flex-direction:column;gap:.7rem;">
-          <a href="contact.html" style="display:flex;align-items:center;justify-content:center;gap:.5rem;background:var(--green);color:#fff;font-weight:700;font-size:.95rem;padding:.875rem 1.5rem;border-radius:10px;text-decoration:none;transition:background .2s;" onmouseover="this.style.background='var(--green-lt)'" onmouseout="this.style.background='var(--green)'">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.93a19.79 19.79 0 01-3.07-8.67A2 2 0 012.18 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 8.09a16 16 0 006 6l.56-.56a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        <div style="height:1px;background:rgba(255,255,255,.07);margin:1.35rem 0;"></div>
+        <div style="display:flex;flex-direction:column;gap:.6rem;">
+          <a href="contact.html" style="display:flex;align-items:center;justify-content:center;gap:.5rem;background:var(--green);color:#fff;font-weight:700;font-size:.92rem;padding:.85rem 1.5rem;border-radius:10px;text-decoration:none;transition:background .15s;" onmouseover="this.style.background='var(--green-lt)'" onmouseout="this.style.background='var(--green)'">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.93a19.79 19.79 0 01-3.07-8.67A2 2 0 012.18 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 8.09a16 16 0 006 6l.56-.56a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
             Get a Free In-Person Estimate
           </a>
-          <p style="font-size:.72rem;color:rgba(255,255,255,.28);text-align:center;">We'll bring physical flake samples to your home — free, no commitment.</p>
+          <p style="font-size:.7rem;color:rgba(255,255,255,.28);text-align:center;">We bring physical flake samples to your home — free, no commitment.</p>
         </div>
       </div>
 
@@ -191,206 +207,549 @@
   </div>
 </section>
 
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  WebGL Shaders                                            -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<script id="vs" type="x-shader/x-vertex">
+attribute vec2 a_pos;
+varying vec2 v_uv;
+void main() {
+  v_uv = a_pos * 0.5 + 0.5;          /* 0=bottom-left, 1=top-right */
+  gl_Position = vec4(a_pos, 0.0, 1.0);
+}
+</script>
+
+<script id="fs" type="x-shader/x-fragment">
+precision highp float;
+
+uniform sampler2D u_garage;
+uniform sampler2D u_flake;
+uniform vec2      u_poly[4];   /* floor corners, image UV (Y-down), CW order */
+uniform mat3      u_H;         /* homography: image UV → floor UV           */
+uniform float     u_slider;   /* 0-1 compare split position (1 = off)      */
+uniform float     u_tiles;    /* texture tile count across floor            */
+uniform float     u_compare;  /* 1.0 = compare mode active                 */
+
+varying vec2 v_uv;
+
+/* ── Noise ── */
+float hash(vec2 p) {
+  p = fract(p * vec2(234.34, 435.345));
+  p += dot(p, p + 34.23);
+  return fract(p.x * p.y);
+}
+vec2 rnd2(vec2 p) { return vec2(hash(p), hash(p + vec2(1.7, 3.9))); }
+
+/* ── Convex polygon containment (CW winding in Y-down space) ── */
+bool inPoly(vec2 p) {
+  vec2 v0=u_poly[0], v1=u_poly[1], v2=u_poly[2], v3=u_poly[3];
+  float s0 = (v1.x-v0.x)*(p.y-v0.y) - (v1.y-v0.y)*(p.x-v0.x);
+  float s1 = (v2.x-v1.x)*(p.y-v1.y) - (v2.y-v1.y)*(p.x-v1.x);
+  float s2 = (v3.x-v2.x)*(p.y-v2.y) - (v3.y-v2.y)*(p.x-v2.x);
+  float s3 = (v0.x-v3.x)*(p.y-v3.y) - (v0.y-v3.y)*(p.x-v3.x);
+  /* All same sign = inside */
+  return (s0>=0.0 && s1>=0.0 && s2>=0.0 && s3>=0.0) ||
+         (s0<=0.0 && s1<=0.0 && s2<=0.0 && s3<=0.0);
+}
+
+/* ── Soft-light blend ── */
+float softLight(float b, float s) {
+  if (s < 0.5) return b - (1.0-2.0*s)*b*(1.0-b);
+  float g = b < 0.25 ? ((16.0*b-12.0)*b+4.0)*b : sqrt(b);
+  return b + (2.0*s-1.0)*(g-b);
+}
+
+void main() {
+  /* UNPACK_FLIP_Y was set on upload, so texture is stored Y-up (same as v_uv).
+     iuv is image-convention (Y=0 at top) used only for polygon math. */
+  vec2 iuv = vec2(v_uv.x, 1.0 - v_uv.y);
+
+  /* Sample garage with Y-up UV (FLIP_Y was set on upload, image appears correct) */
+  vec4 orig = texture2D(u_garage, v_uv);
+
+  /* Compare split: left of slider → show original */
+  if (u_compare > 0.5 && iuv.x < u_slider) {
+    gl_FragColor = orig;
+    return;
+  }
+
+  /* Floor mask */
+  if (!inPoly(iuv)) {
+    gl_FragColor = orig;
+    return;
+  }
+
+  /* ── Perspective-correct texture coord via homography ── */
+  vec3 tc = u_H * vec3(iuv, 1.0);
+  vec2 fc = tc.xy / tc.z;             /* floor UV: 0=back-left, 1=front-right */
+
+  /* Stochastic tiling: blend 4 neighbor tiles with per-tile random UV offsets.
+     Eliminates the visible repeating grid with zero seam artifacts. */
+  vec2 tileId = floor(fc * u_tiles);
+  vec2 tileUV = fract(fc * u_tiles);
+
+  vec2 o00 = rnd2(tileId);
+  vec2 o10 = rnd2(tileId + vec2(1., 0.));
+  vec2 o01 = rnd2(tileId + vec2(0., 1.));
+  vec2 o11 = rnd2(tileId + vec2(1., 1.));
+
+  vec4 f00 = texture2D(u_flake, tileUV + o00);
+  vec4 f10 = texture2D(u_flake, tileUV + o10);
+  vec4 f01 = texture2D(u_flake, tileUV + o01);
+  vec4 f11 = texture2D(u_flake, tileUV + o11);
+
+  /* Sharper blend — keeps a large "pure" zone per tile (less blur, still seamless) */
+  vec2 bw = smoothstep(0.25, 0.75, tileUV);
+  vec4 flake = mix(mix(f00, f10, bw.x), mix(f01, f11, bw.x), bw.y);
+
+  /* ── Luminance of original floor (shadow / lighting map) ── */
+  float lum = dot(orig.rgb, vec3(0.299, 0.587, 0.114));
+
+  /* ── 1. Start with flake texture (base coat covers concrete) ── */
+  vec3 c = flake.rgb;
+
+  /* ── 2. Soft-light blend: preserves floor's light/shadow gradient ── */
+  c.r = softLight(c.r, lum);
+  c.g = softLight(c.g, lum);
+  c.b = softLight(c.b, lum);
+  c = mix(flake.rgb, c, 0.65);
+
+  /* ── 3. Multiply: deepens shadows from original floor ── */
+  float shadow = pow(lum, 0.8);
+  c = mix(c, c * shadow * 1.2, 0.3);
+
+  /* ── 4. Polyaspartic gloss: Fresnel near horizon + spot specular ── */
+  /* Fresnel: grazing angle at far end of floor (back wall) */
+  float yNorm  = (iuv.y - u_poly[0].y) / max(1.0 - u_poly[0].y, 0.001);
+  float fresnel = pow(max(0.0, 1.0 - yNorm), 2.5) * 0.09;
+  /* Spot specular: light from upper-left (typical for garage-door-open shot) */
+  float specD  = length(iuv - vec2(0.18, 0.42));
+  float spec   = pow(max(0.0, 1.0 - specD * 5.5), 5.0) * 0.18;
+  c += fresnel + spec;
+
+  /* ── 5. Micro-roughness variation (prevents flat plastic look) ── */
+  float rough = (hash(fc * 55.0 + 0.77) - 0.5) * 0.022;
+  c += rough;
+
+  /* ── 6. Edge fade: softer at back wall, tight at front and sides ── */
+  float fadeX  = smoothstep(0.0, 0.04, fc.x) * smoothstep(1.0, 0.96, fc.x);
+  float fadeY  = smoothstep(0.0, 0.07, fc.y) * smoothstep(1.0, 0.99, fc.y);
+  c = mix(orig.rgb, c, fadeX * fadeY);
+
+  gl_FragColor = vec4(clamp(c, 0.0, 1.0), 1.0);
+}
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  JavaScript                                               -->
+<!-- ═══════════════════════════════════════════════════════════ -->
 <script>
-/* ── Data ── */
+/* ── Color data ── */
 const COLORS = [
-  // Signature Blends
-  { id:'gravel',      name:'Gravel',       file:'flake-gravel.jpg',      cat:'signature', desc:'Classic gray, silver, and white mix. Clean and neutral — the most universally flattering floor for any garage.' },
-  { id:'silverton',   name:'Silverton',    file:'flake-silverton.jpg',   cat:'signature', desc:'High-contrast black and white chips with dark accents. Bold, graphic, and dramatic.' },
-  { id:'wombat',      name:'Wombat',       file:'flake-wombat.jpg',      cat:'signature', desc:'Charcoal and gray blend with subtle warm undertones. Refined and understated.' },
-  { id:'creekbed',    name:'Creekbed',     file:'flake-creekbed.jpg',    cat:'signature', desc:'Earthy brown, tan, and cream. A natural, organic look that pairs with stone, wood, and mountain homes.' },
-  { id:'cabin-fever', name:'Cabin Fever',  file:'flake-cabin-fever.jpg', cat:'signature', desc:'Warm tan and beige chips with dark accents. Earthy and inviting — perfect for Colorado mountain cabins.' },
-  { id:'shoreline',   name:'Shoreline',    file:'flake-shoreline.jpg',   cat:'signature', desc:'Light beige and cream with natural variation. Bright and open, like sand — makes any space feel larger.' },
-  { id:'tidal-wave',  name:'Tidal Wave',   file:'flake-tidal-wave.jpg',  cat:'signature', desc:'Cool gray and blue-gray tones. Calm and clean — a modern mountain look that pairs with everything.' },
-  { id:'steamboat',   name:'Steamboat',    file:'flake-steamboat.jpg',   cat:'signature', desc:'Bold blue, black, and white flakes. Our hometown blend — distinctive and full of character. Nothing else like it.' },
-  { id:'nightfall',   name:'Nightfall',    file:'flake-nightfall.jpg',   cat:'signature', desc:'Deep charcoal and dark gray. Sophisticated and sleek — makes everything else in the garage pop.' },
-  // Marble Blends
-  { id:'ash',    name:'Ash',   file:'flake-ash.jpg',   cat:'marble', desc:'Light gray with very fine marble flakes for a polished, refined look. Elegant and clean — like polished concrete.' },
-  { id:'slate',  name:'Slate', file:'flake-slate.jpg', cat:'marble', desc:'Medium gray marble blend. Timeless, versatile, and works in any setting from modern to rustic.' },
-  { id:'briar',  name:'Briar', file:'flake-briar.jpg', cat:'marble', desc:'Warm gray and brown marble tones. Earthy yet refined — brings warmth to the space without going full brown.' },
-  // Stone Blends
-  { id:'juneau',   name:'Juneau',   file:'flake-juneau.jpg',   cat:'stone', desc:'Very light, almost white — bright and airy with a fine, high-end stone texture. Makes any garage feel like a finished space.' },
-  { id:'husky',    name:'Husky',    file:'flake-husky.jpg',    cat:'stone', desc:'Light gray and white chips with a natural stone feel. Clean, neutral, and endlessly versatile.' },
-  { id:'denali',   name:'Denali',   file:'flake-denali.jpg',   cat:'stone', desc:'Medium-dark gray with cool tones. Named for the mountain — strong, enduring, and quietly impressive.' },
-  { id:'acadia',   name:'Acadia',   file:'flake-acadia.jpg',   cat:'stone', desc:'Warm tan and cream with natural variation. Soft and inviting — the kind of floor that makes your garage feel like a room.' },
-  { id:'klondike', name:'Klondike', file:'flake-klondike.jpg', cat:'stone', desc:'White and cream base with a distinctive purple accent chip. Striking and unexpected — for the homeowner who wants something truly unique.' },
-  { id:'cascade',  name:'Cascade',  file:'flake-cascade.jpg',  cat:'stone', desc:'Warm tan, brown, and beige tones. Natural and organic — like Colorado sandstone underfoot.' },
+  { id:'gravel',      name:'Gravel',      file:'flake-gravel.jpg',      cat:'signature', desc:'Classic gray, silver, and white mix. Clean and neutral — the most universally flattering floor for any garage.' },
+  { id:'silverton',   name:'Silverton',   file:'flake-silverton.jpg',   cat:'signature', desc:'High-contrast black and white chips with dark accents. Bold, graphic, and dramatic.' },
+  { id:'wombat',      name:'Wombat',      file:'flake-wombat.jpg',      cat:'signature', desc:'Charcoal and gray blend with subtle warm undertones. Refined and understated.' },
+  { id:'creekbed',    name:'Creekbed',    file:'flake-creekbed.jpg',    cat:'signature', desc:'Earthy brown, tan, and cream. A natural, organic look that pairs with stone, wood, and mountain homes.' },
+  { id:'cabin-fever', name:'Cabin Fever', file:'flake-cabin-fever.jpg', cat:'signature', desc:'Warm tan and beige chips with dark accents. Earthy and inviting — perfect for Colorado mountain cabins.' },
+  { id:'shoreline',   name:'Shoreline',   file:'flake-shoreline.jpg',   cat:'signature', desc:'Light beige and cream with natural variation. Bright and open, like sand — makes any space feel larger.' },
+  { id:'tidal-wave',  name:'Tidal Wave',  file:'flake-tidal-wave.jpg',  cat:'signature', desc:'Cool gray and blue-gray tones. Calm and clean — a modern mountain look that pairs with everything.' },
+  { id:'steamboat',   name:'Steamboat',   file:'flake-steamboat.jpg',   cat:'signature', desc:'Bold blue, black, and white flakes. Our hometown blend — distinctive and full of character.' },
+  { id:'nightfall',   name:'Nightfall',   file:'flake-nightfall.jpg',   cat:'signature', desc:'Deep charcoal and dark gray. Sophisticated and sleek — makes everything else in the garage pop.' },
+  { id:'ash',         name:'Ash',         file:'flake-ash.jpg',         cat:'marble',    desc:'Light gray with very fine marble flakes. Elegant and clean — like polished concrete.' },
+  { id:'slate',       name:'Slate',       file:'flake-slate.jpg',       cat:'marble',    desc:'Medium gray marble blend. Timeless, versatile, and works in any setting from modern to rustic.' },
+  { id:'briar',       name:'Briar',       file:'flake-briar.jpg',       cat:'marble',    desc:'Warm gray and brown marble tones. Earthy yet refined — brings warmth to the space.' },
+  { id:'juneau',      name:'Juneau',      file:'flake-juneau.jpg',      cat:'stone',     desc:'Very light, almost white — bright and airy. Makes any garage feel like a finished space.' },
+  { id:'husky',       name:'Husky',       file:'flake-husky.jpg',       cat:'stone',     desc:'Light gray and white chips with a natural stone feel. Clean, neutral, and endlessly versatile.' },
+  { id:'denali',      name:'Denali',      file:'flake-denali.jpg',      cat:'stone',     desc:'Medium-dark gray with cool tones. Strong, enduring, and quietly impressive.' },
+  { id:'acadia',      name:'Acadia',      file:'flake-acadia.jpg',      cat:'stone',     desc:'Warm tan and cream. Soft and inviting — the kind of floor that makes your garage feel like a room.' },
+  { id:'klondike',    name:'Klondike',    file:'flake-klondike.jpg',    cat:'stone',     desc:'White and cream base with a distinctive purple accent chip. Striking and unexpected.' },
+  { id:'cascade',     name:'Cascade',     file:'flake-cascade.jpg',     cat:'stone',     desc:'Warm tan, brown, and beige tones. Natural and organic — like Colorado sandstone underfoot.' },
 ];
 
-/* ── Floor polygon (normalized 0–1 coords) ── */
-// Default sample: ba-b1.jpg — clean empty garage, wall/floor junction ~43% down
-const FLOOR_POLY_DEFAULT = [[0.0,0.43],[1.0,0.43],[1.0,1.0],[0.0,1.0]];
-// User upload: generic bottom portion
-const FLOOR_POLY_UPLOAD  = [[0.0,0.46],[1.0,0.46],[1.0,1.0],[0.0,1.0]];
+/* ── Floor polygons [back-left, back-right, front-right, front-left] image UV (Y-down) ── */
+/* CW winding when drawn in standard image coords */
+const POLY_SAMPLE = [[0.08, 0.37], [0.92, 0.37], [1.00, 1.00], [0.00, 1.00]];
+const POLY_UPLOAD = [[0.10, 0.46], [0.90, 0.46], [1.00, 1.00], [0.00, 1.00]];
 
 /* ── State ── */
-let active      = COLORS[0];
+let gl, prog, locs;
+let garageTex = null, flakeTex = null;
+let garageImg = null;
+let activeColor = COLORS[0];
 let category    = 'all';
-let garageImg   = null;
-let isUpload    = false;
-let isComparing = false;
-let floorPoly   = FLOOR_POLY_DEFAULT;
+let floorPoly   = POLY_SAMPLE.map(p => [...p]);
+let sliderX     = 0.5;
+let compareOn   = false;
+let handlesOn   = false;
 const texCache  = {};
 
-/* ── Image loading ── */
-function loadImg(src) {
-  if (texCache[src]) return Promise.resolve(texCache[src]);
+/* ══════════════════════════════════════════
+   WebGL setup
+══════════════════════════════════════════ */
+function initGL() {
+  const canvas = document.getElementById('viz-canvas');
+  gl = canvas.getContext('webgl2')
+    || canvas.getContext('webgl')
+    || canvas.getContext('experimental-webgl');
+  if (!gl) { console.error('WebGL unavailable'); return false; }
+
+  const vs = compileShader(gl.VERTEX_SHADER,   document.getElementById('vs').text);
+  const fs = compileShader(gl.FRAGMENT_SHADER, document.getElementById('fs').text);
+  prog = gl.createProgram();
+  gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+    console.error('Shader link error:', gl.getProgramInfoLog(prog)); return false;
+  }
+
+  /* Fullscreen quad */
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(prog, 'a_pos');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  /* Cache uniform locations */
+  gl.useProgram(prog);
+  locs = {
+    garage:  gl.getUniformLocation(prog, 'u_garage'),
+    flake:   gl.getUniformLocation(prog, 'u_flake'),
+    poly:    gl.getUniformLocation(prog, 'u_poly'),
+    H:       gl.getUniformLocation(prog, 'u_H'),
+    slider:  gl.getUniformLocation(prog, 'u_slider'),
+    tiles:   gl.getUniformLocation(prog, 'u_tiles'),
+    compare: gl.getUniformLocation(prog, 'u_compare'),
+  };
+  gl.uniform1i(locs.garage, 0);
+  gl.uniform1i(locs.flake,  1);
+  return true;
+}
+
+function compileShader(type, src) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, src.trim()); gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS))
+    console.error('Shader compile error:', gl.getShaderInfoLog(s));
+  return s;
+}
+
+/* ══════════════════════════════════════════
+   Homography (DLT — 4-point, exact)
+══════════════════════════════════════════ */
+function computeH(src, dst) {
+  /* Returns H (row-major 3×3) such that dst ~ H * src in homogeneous coords */
+  const A = [], b = [];
+  for (let i = 0; i < 4; i++) {
+    const [sx,sy] = src[i], [dx,dy] = dst[i];
+    A.push([sx,sy,1, 0, 0,0, -dx*sx,-dx*sy]); b.push(dx);
+    A.push([ 0, 0,0,sx,sy,1, -dy*sx,-dy*sy]); b.push(dy);
+  }
+  const h = gaussElim(A, b);
+  return [[h[0],h[1],h[2]], [h[3],h[4],h[5]], [h[6],h[7],1]];
+}
+
+function gaussElim(A, b) {
+  const n = b.length;
+  const M = A.map((r,i) => [...r, b[i]]);
+  for (let c = 0; c < n; c++) {
+    let mx = c;
+    for (let r = c+1; r < n; r++) if (Math.abs(M[r][c]) > Math.abs(M[mx][c])) mx = r;
+    [M[c],M[mx]] = [M[mx],M[c]];
+    for (let r = c+1; r < n; r++) {
+      const f = M[r][c] / M[c][c];
+      for (let j = c; j <= n; j++) M[r][j] -= f * M[c][j];
+    }
+  }
+  const x = new Array(n);
+  for (let i = n-1; i >= 0; i--) {
+    x[i] = M[i][n];
+    for (let j = i+1; j < n; j++) x[i] -= M[i][j]*x[j];
+    x[i] /= M[i][i];
+  }
+  return x;
+}
+
+function polyToColumnMajorMat3(H) {
+  /* WebGL mat3 is column-major */
+  return new Float32Array([
+    H[0][0], H[1][0], H[2][0],
+    H[0][1], H[1][1], H[2][1],
+    H[0][2], H[1][2], H[2][2],
+  ]);
+}
+
+/* ══════════════════════════════════════════
+   Render
+══════════════════════════════════════════ */
+function render() {
+  if (!gl || !garageTex || !flakeTex) return;
+
+  /* Compute homography: image UV → floor UV */
+  /* src = floor corners in image UV space   */
+  /* dst = floor corners in texture UV space  */
+  const dst = [[0,0],[1,0],[1,1],[0,1]]; // back-left, back-right, front-right, front-left
+  const H   = computeH(floorPoly, dst);
+
+  /* Upload uniforms */
+  gl.uniform2fv(locs.poly,  new Float32Array(floorPoly.flat()));
+  gl.uniformMatrix3fv(locs.H, false, polyToColumnMajorMat3(H));
+  gl.uniform1f(locs.slider,  sliderX);
+  gl.uniform1f(locs.tiles,   10.0);  /* tiles across floor width */
+  gl.uniform1f(locs.compare, compareOn ? 1.0 : 0.0);
+
+  /* Bind textures */
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, garageTex);
+  gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, flakeTex);
+
+  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+  /* Draw compare line */
+  const line = document.getElementById('cmp-line');
+  if (compareOn) {
+    line.style.left = (sliderX * 100) + '%';
+  }
+}
+
+/* ══════════════════════════════════════════
+   Texture loading
+══════════════════════════════════════════ */
+function isPOT(v) { return v > 0 && (v & (v - 1)) === 0; }
+
+function toPOTCanvas(img) {
+  /* Resize img to nearest power-of-2 dimensions on an offscreen canvas */
+  const pot = (v) => Math.pow(2, Math.ceil(Math.log2(Math.max(v, 1))));
+  const w = pot(img.naturalWidth  || img.width);
+  const h = pot(img.naturalHeight || img.height);
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  c.getContext('2d').drawImage(img, 0, 0, w, h);
+  return c;
+}
+
+function uploadTexture(src, wrapMode) {
+  /* src: HTMLImageElement or HTMLCanvasElement; wrapMode: gl.REPEAT or gl.CLAMP_TO_EDGE */
+  const tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);   /* flip Y so image top = texture top */
+
+  const isWebGL2 = !!gl.texStorage2D; /* detect WebGL2 */
+  const needsPOT = !isWebGL2 && wrapMode === gl.REPEAT;
+  const source   = needsPOT ? toPOTCanvas(src) : src;
+  const w = source.naturalWidth  || source.width;
+  const h = source.naturalHeight || source.height;
+
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+
+  const canMip = isWebGL2 || (isPOT(w) && isPOT(h));
+  const wrap   = (isWebGL2 || isPOT(w)) ? wrapMode : gl.CLAMP_TO_EDGE;
+
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, canMip ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  if (canMip) gl.generateMipmap(gl.TEXTURE_2D);
+
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+  return tex;
+}
+
+function loadImage(src) {
+  if (texCache['img_' + src]) return Promise.resolve(texCache['img_' + src]);
   return new Promise((res, rej) => {
     const img = new Image();
-    img.onload  = () => { texCache[src] = img; res(img); };
+    img.crossOrigin = 'anonymous';
+    img.onload  = () => { texCache['img_' + src] = img; res(img); };
     img.onerror = rej;
     img.src = src;
   });
 }
 
-/* ── Canvas setup ── */
-function setupCanvas(img) {
-  const canvas = document.getElementById('floorCanvas');
-  canvas.width  = img.naturalWidth;
-  canvas.height = img.naturalHeight;
-  return canvas;
+async function loadFlakeTex(file) {
+  if (texCache['tex_' + file]) return texCache['tex_' + file];
+  const img = await loadImage(file);
+  const tex = uploadTexture(img, gl.REPEAT);  /* flake: repeat for tiling */
+  texCache['tex_' + file] = tex;
+  return tex;
 }
 
-/* ── Rendering ── */
-function drawBase(ctx, img) {
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  ctx.drawImage(img, 0, 0, ctx.canvas.width, ctx.canvas.height);
-}
-
-function clipToFloor(ctx, poly, W, H) {
-  ctx.beginPath();
-  poly.forEach(([nx, ny], i) => {
-    const x = nx * W, y = ny * H;
-    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-  });
-  ctx.closePath();
-  ctx.clip();
-}
-
-async function render(colorId, compare) {
-  const canvas = document.getElementById('floorCanvas');
-  const ctx    = canvas.getContext('2d');
-  const W      = canvas.width;
-  const H      = canvas.height;
-
-  drawBase(ctx, garageImg);
-  if (compare) return;
-
-  const color = COLORS.find(c => c.id === colorId) || COLORS[0];
-  let flakeImg;
-  try { flakeImg = await loadImg(color.file); } catch(e) { return; }
-
-  // Small tile = realistic flake chip scale
-  const TILE = 40;
-  const offscreen = document.createElement('canvas');
-  offscreen.width = offscreen.height = TILE;
-  const oc = offscreen.getContext('2d');
-  oc.drawImage(flakeImg, 0, 0, TILE, TILE);
-  const pattern = ctx.createPattern(offscreen, 'repeat');
-
-  const floorTopY = Math.min(...floorPoly.map(([,ny]) => ny)) * H;
-
-  // ── 1. Lay down flake texture on floor (two passes at different angles)
-  ctx.save();
-  clipToFloor(ctx, floorPoly, W, H);
-  const cx = W / 2, cy = H / 2;
-  // Primary pass
-  ctx.globalAlpha = 1;
-  ctx.translate(cx, cy); ctx.rotate(3 * Math.PI / 180); ctx.translate(-cx, -cy);
-  ctx.fillStyle = pattern;
-  ctx.fillRect(-80, -80, W + 160, H + 160);
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  // Second pass at 47° — breaks up horizontal/vertical tile repetition
-  ctx.globalAlpha = 0.2;
-  ctx.translate(cx, cy); ctx.rotate(47 * Math.PI / 180); ctx.translate(-cx, -cy);
-  ctx.fillStyle = pattern;
-  ctx.fillRect(-H, -H, (W + H) * 2, (W + H) * 2);
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  ctx.globalAlpha = 1;
-
-  // ── 2. Transfer floor shadows onto texture (raise brightness first so only dark spots darken)
-  ctx.globalCompositeOperation = 'multiply';
-  ctx.globalAlpha = 0.28;
-  ctx.filter = 'saturate(0) brightness(1.55) contrast(0.85)';
-  ctx.drawImage(garageImg, 0, 0, W, H);
-  ctx.filter = 'none';
-  ctx.restore();
-  ctx.globalAlpha = 1;
-  ctx.globalCompositeOperation = 'source-over';
-
-  // ── 3. Draw original image OVER non-floor area (walls / objects on top) ───
-  // Uses the even-odd rule: full-canvas rect (CW) + floor poly (CCW) = clip to everything except floor
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(0, 0, W, H);
-  // floor poly drawn in reverse = counter-clockwise
-  ctx.moveTo(floorPoly[floorPoly.length - 1][0] * W, floorPoly[floorPoly.length - 1][1] * H);
-  for (let i = floorPoly.length - 2; i >= 0; i--) {
-    ctx.lineTo(floorPoly[i][0] * W, floorPoly[i][1] * H);
-  }
-  ctx.closePath();
-  ctx.clip('evenodd');
-  ctx.drawImage(garageImg, 0, 0, W, H);
-  ctx.restore();
-
-  // ── 4. Gloss / clear-coat specular highlight ──────────────────────────────
-  ctx.save();
-  clipToFloor(ctx, floorPoly, W, H);
-  const glossGrad = ctx.createLinearGradient(W * 0.05, floorTopY, W * 0.7, H);
-  glossGrad.addColorStop(0,    'rgba(255,255,255,0.14)');
-  glossGrad.addColorStop(0.4,  'rgba(255,255,255,0.05)');
-  glossGrad.addColorStop(1,    'rgba(255,255,255,0.0)');
-  ctx.fillStyle = glossGrad;
-  ctx.fillRect(0, floorTopY, W, H - floorTopY);
-  ctx.restore();
-}
-
-/* ── Trigger render ── */
-async function applyColor(color) {
-  active = color;
-  updateUI(color);
-
+/* ══════════════════════════════════════════
+   Source & color switching
+══════════════════════════════════════════ */
+async function setGarage(src, poly) {
   showLoading(true);
-  await render(color.id, false);
-  showLoading(false);
+  try {
+    const img = await loadImage(src);
+    garageImg = img;
+    floorPoly = poly.map(p => [...p]);
+
+    /* Size canvas to match image aspect, max 1200px wide */
+    const canvas = document.getElementById('viz-canvas');
+    const maxW = Math.min(1200, canvas.parentElement.clientWidth * 2);
+    canvas.width  = Math.min(img.naturalWidth, maxW);
+    canvas.height = Math.round(canvas.width * img.naturalHeight / img.naturalWidth);
+
+    garageTex = uploadTexture(img, gl.CLAMP_TO_EDGE);  /* garage: clamp, no tiling */
+    updateHandlePositions();
+    updateFloorOverlay();
+    render();
+  } finally { showLoading(false); }
 }
 
-function showLoading(on) {
-  document.getElementById('canvas-loading').style.display = on ? 'flex' : 'none';
+async function applyColor(color) {
+  activeColor = color;
+  updateColorUI(color);
+  showLoading(true);
+  try {
+    flakeTex = await loadFlakeTex(color.file);
+    render();
+  } finally { showLoading(false); }
 }
 
-function updateUI(color) {
-  const file = color.file;
-  document.getElementById('info-thumb').style.backgroundImage  = `url('${file}')`;
-  document.getElementById('badge-thumb').style.backgroundImage = `url('${file}')`;
-  document.getElementById('badge-name').textContent  = color.name;
-  document.getElementById('info-name').textContent   = color.name;
-  document.getElementById('info-cat').textContent    = catLabel(color.cat);
-  document.getElementById('color-desc').textContent  = color.desc;
+function useSample() {
+  document.getElementById('btn-sample').classList.add('active');
+  document.getElementById('btn-upload').classList.remove('active');
+  document.getElementById('tip-text').textContent = 'Perspective-correct rendering with shadow & lighting preservation. Hold Compare to see original concrete.';
+  setGarage('ba-b1.jpg', POLY_SAMPLE);
+}
+
+async function handleUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  document.getElementById('btn-upload').classList.add('active');
+  document.getElementById('btn-sample').classList.remove('active');
+  document.getElementById('tip-text').textContent = 'Drag the green handles to define your floor area. Hold Compare to see original.';
+  const url = URL.createObjectURL(file);
+  await setGarage(url, POLY_UPLOAD);
+  /* Auto-show handles for uploads */
+  if (!handlesOn) toggleHandles();
+}
+
+/* ══════════════════════════════════════════
+   Compare slider
+══════════════════════════════════════════ */
+let cmpDragging = false;
+
+function startCompare(e) {
+  if (e) { e.preventDefault(); sliderX = 0.5; }
+  compareOn = true;
+  document.getElementById('btn-compare').classList.add('active');
+  document.getElementById('preview-wrap').classList.add('compare-mode');
+  render();
+}
+
+function endCompare() {
+  compareOn = false;
+  document.getElementById('btn-compare').classList.remove('active');
+  document.getElementById('preview-wrap').classList.remove('compare-mode');
+  render();
+}
+
+document.getElementById('preview-wrap').addEventListener('mousemove', e => {
+  if (!compareOn) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  sliderX = Math.max(0.05, Math.min(0.95, (e.clientX - rect.left) / rect.width));
+  render();
+});
+document.getElementById('preview-wrap').addEventListener('touchmove', e => {
+  if (!compareOn) return;
+  e.preventDefault();
+  const rect = e.currentTarget.getBoundingClientRect();
+  sliderX = Math.max(0.05, Math.min(0.95, (e.touches[0].clientX - rect.left) / rect.width));
+  render();
+}, { passive: false });
+
+/* ══════════════════════════════════════════
+   Corner handles for floor calibration
+══════════════════════════════════════════ */
+function toggleHandles() {
+  handlesOn = !handlesOn;
+  document.getElementById('preview-wrap').classList.toggle('handles-visible', handlesOn);
+  document.getElementById('btn-handles').classList.toggle('active', handlesOn);
+  if (handlesOn) { updateHandlePositions(); updateFloorOverlay(); }
+}
+
+function updateHandlePositions() {
+  const wrap = document.getElementById('preview-wrap');
+  const W = wrap.offsetWidth, H = wrap.offsetHeight;
+  floorPoly.forEach(([nx,ny], i) => {
+    const el = document.getElementById('h' + i);
+    el.style.left = (nx * W) + 'px';
+    el.style.top  = (ny * H) + 'px';
+  });
+}
+
+function updateFloorOverlay() {
+  const pts = floorPoly.map(([x,y]) => x+','+y).join(' ');
+  document.getElementById('floor-polygon').setAttribute('points', pts);
+}
+
+/* Make each handle draggable */
+[0,1,2,3].forEach(i => {
+  const el = document.getElementById('h' + i);
+  let dragging = false;
+
+  function onDown(e) {
+    dragging = true;
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  function onMove(e) {
+    if (!dragging) return;
+    const wrap = document.getElementById('preview-wrap');
+    const rect = wrap.getBoundingClientRect();
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const cy = e.touches ? e.touches[0].clientY : e.clientY;
+    const nx = Math.max(0, Math.min(1, (cx - rect.left) / rect.width));
+    const ny = Math.max(0, Math.min(1, (cy - rect.top)  / rect.height));
+    floorPoly[i] = [nx, ny];
+    el.style.left = (nx * rect.width)  + 'px';
+    el.style.top  = (ny * rect.height) + 'px';
+    updateFloorOverlay();
+    render();
+  }
+  function onUp() { dragging = false; }
+
+  el.addEventListener('mousedown',  onDown);
+  el.addEventListener('touchstart', onDown, { passive: false });
+  document.addEventListener('mousemove',  onMove);
+  document.addEventListener('touchmove',  onMove, { passive: false });
+  document.addEventListener('mouseup',    onUp);
+  document.addEventListener('touchend',   onUp);
+});
+
+/* ══════════════════════════════════════════
+   Swatch grid & UI updates
+══════════════════════════════════════════ */
+function catLabel(cat) {
+  return cat === 'signature' ? 'Signature Blend' : cat === 'marble' ? 'Marble Blend' : 'Stone Blend';
+}
+
+function updateColorUI(color) {
+  document.getElementById('badge-thumb').style.backgroundImage = `url('${color.file}')`;
+  document.getElementById('badge-name').textContent = color.name;
+  document.getElementById('info-thumb').style.backgroundImage = `url('${color.file}')`;
+  document.getElementById('info-name').textContent = color.name;
+  document.getElementById('info-cat').textContent  = catLabel(color.cat);
+  document.getElementById('color-desc').textContent = color.desc;
   document.querySelectorAll('.swatch-item').forEach(el => el.classList.remove('active'));
   const sw = document.getElementById('sw-' + color.id);
   if (sw) sw.classList.add('active');
 }
 
-function catLabel(cat) {
-  return cat === 'signature' ? 'Signature Blend' : cat === 'marble' ? 'Marble Blend' : 'Stone Blend';
-}
-
-/* ── Swatches ── */
 function renderSwatches() {
   const grid = document.getElementById('swatch-grid');
   grid.innerHTML = '';
   const list = category === 'all' ? COLORS : COLORS.filter(c => c.cat === category);
   list.forEach(color => {
     const item = document.createElement('div');
-    item.className = 'swatch-item' + (color.id === active.id ? ' active' : '');
+    item.className = 'swatch-item' + (color.id === activeColor.id ? ' active' : '');
     item.id = 'sw-' + color.id;
-    item.setAttribute('aria-label', color.name);
     item.onclick = () => applyColor(color);
     item.innerHTML = `
       <div class="swatch-chip" style="background-image:url('${color.file}');">
         <div class="swatch-check">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
         </div>
       </div>
       <div class="swatch-name">${color.name}</div>`;
@@ -405,65 +764,29 @@ function setCategory(cat, btn) {
   renderSwatches();
 }
 
-/* ── Source switching ── */
-async function loadGarage(src, poly, isSample) {
-  showLoading(true);
-  try {
-    garageImg = await loadImg(src);
-    floorPoly = poly;
-    isUpload  = !isSample;
-    setupCanvas(garageImg);
-    await render(active.id, false);
-    document.getElementById('btn-sample').classList.toggle('active', isSample);
-    document.getElementById('btn-upload').classList.toggle('active', !isSample);
-    document.getElementById('tip-text').textContent = isSample
-      ? 'Actual flake texture rendered on the floor area. Hold Compare to see the original concrete.'
-      : 'Color applied to the lower portion — works best with photos taken from the garage doorway.';
-  } finally {
-    showLoading(false);
-  }
+function showLoading(on) {
+  document.getElementById('loading-overlay').classList.toggle('on', on);
 }
 
-function useSample() {
-  loadGarage('ba-b1.jpg', FLOOR_POLY_DEFAULT, true);
-}
+/* Resize handles when window resizes */
+window.addEventListener('resize', () => {
+  if (handlesOn) updateHandlePositions();
+});
 
-function handleUpload(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const url = URL.createObjectURL(file);
-  loadGarage(url, FLOOR_POLY_UPLOAD, false);
-}
-
-/* ── Compare ── */
-function startCompare(e) {
-  if (e) e.preventDefault();
-  isComparing = true;
-  const canvas = document.getElementById('floorCanvas');
-  const ctx = canvas.getContext('2d');
-  drawBase(ctx, garageImg);
-  document.getElementById('btn-compare').classList.add('active');
-}
-function endCompare() {
-  if (!isComparing) return;
-  isComparing = false;
-  document.getElementById('btn-compare').classList.remove('active');
-  render(active.id, false);
-}
-
-/* ── Init ── */
+/* ══════════════════════════════════════════
+   Boot
+══════════════════════════════════════════ */
 async function init() {
+  if (!initGL()) return;
   renderSwatches();
+  updateColorUI(activeColor);
   showLoading(true);
   try {
-    garageImg = await loadImg('ba-b1.jpg');
-    setupCanvas(garageImg);
-    await render(active.id, false);
-    updateUI(active);
-  } finally {
-    showLoading(false);
-  }
+    flakeTex = await loadFlakeTex(activeColor.file);
+    await setGarage('ba-b1.jpg', POLY_SAMPLE);
+  } finally { showLoading(false); }
 }
+
 init();
 </script>
 </body>
