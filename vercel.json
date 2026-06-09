@@ -1,3 +1,10 @@
 {
-  "cleanUrls": true
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/services",  "destination": "/index.html" },
+    { "source": "/process",   "destination": "/index.html" },
+    { "source": "/flakes",    "destination": "/index.html" },
+    { "source": "/gallery",   "destination": "/index.html" },
+    { "source": "/locations", "destination": "/index.html" }
+  ]
 }
