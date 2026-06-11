@@ -1,10 +1,10 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/services",  "destination": "/index.html" },
-    { "source": "/process",   "destination": "/index.html" },
-    { "source": "/flakes",    "destination": "/index.html" },
-    { "source": "/gallery",   "destination": "/index.html" },
-    { "source": "/locations", "destination": "/index.html" }
+    { "source": "/services",  "destination": "/" },
+    { "source": "/process",   "destination": "/" },
+    { "source": "/flakes",    "destination": "/" },
+    { "source": "/gallery",   "destination": "/" },
+    { "source": "/locations", "destination": "/" }
   ]
 }
