@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://summitconcretefinishes.com/sitemap.xml
+Sitemap: https://www.summitconcretefinishes.com/sitemap.xml
