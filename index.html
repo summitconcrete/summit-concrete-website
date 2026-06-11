@@ -446,6 +446,122 @@
 
     /* Loc SEO block on stone */
     #locations .seo-block { background: rgba(255,255,255,.65) !important; border-color: rgba(0,0,0,.06) !important; }
+
+    /* ═══════════════════════════════════════════════
+       CREATIVE LAYER
+    ═══════════════════════════════════════════════ */
+
+    /* ── MOUNTAIN RIDGE DIVIDERS ── */
+    .sec-ridge { display: block; width: 100%; height: 64px; }
+    @media(max-width:640px){ .sec-ridge { height: 40px; } }
+
+    /* ── TOPOGRAPHIC TEXTURE (light sections) ── */
+    .topo { position: relative; }
+    .topo::before {
+      content: '';
+      position: absolute; inset: 0;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='700' viewBox='0 0 700 700' fill='none' stroke='%231b3360' stroke-opacity='0.07' stroke-width='1.4'%3E%3Cpath d='M0 90 Q175 30 350 80 T700 60'/%3E%3Cpath d='M0 160 Q190 95 360 150 T700 130'/%3E%3Cpath d='M0 235 Q165 175 345 225 T700 205'/%3E%3Cpath d='M0 310 Q185 255 355 300 T700 285'/%3E%3Cpath d='M0 390 Q170 330 350 380 T700 360'/%3E%3Cpath d='M0 465 Q190 410 360 455 T700 440'/%3E%3Cpath d='M0 540 Q175 485 350 530 T700 515'/%3E%3Cpath d='M0 615 Q185 560 355 605 T700 590'/%3E%3Cellipse cx='540' cy='120' rx='90' ry='34'/%3E%3Cellipse cx='540' cy='120' rx='55' ry='18'/%3E%3Cellipse cx='150' cy='520' rx='80' ry='30'/%3E%3Cellipse cx='150' cy='520' rx='45' ry='15'/%3E%3C/svg%3E");
+      background-size: 700px;
+    }
+    .topo > .wrap { position: relative; z-index: 1; }
+
+    /* ── TRUST MARQUEE ── */
+    .marquee { overflow: hidden; max-width: none; }
+    .marquee-track { display: flex; width: max-content; animation: marquee 30s linear infinite; }
+    .trust-group { display: flex; align-items: center; flex-shrink: 0; }
+    .trust-group .trust-item { margin-right: 1.1rem; white-space: nowrap; }
+    .trust-group .trust-sep { margin-right: 1.1rem; }
+    @keyframes marquee { to { transform: translateX(-50%); } }
+    .trust-bar:hover .marquee-track { animation-play-state: paused; }
+
+    /* ── BEFORE/AFTER COMPARE SLIDER ── */
+    .ba-slider {
+      position: relative; overflow: hidden; border-radius: 14px;
+      --pos: 50%;
+      cursor: ew-resize; touch-action: none; user-select: none; -webkit-user-select: none;
+      box-shadow: 0 2px 12px rgba(0,0,0,.4), 0 18px 60px rgba(0,0,0,.5);
+      outline: none;
+    }
+    .ba-slider:focus-visible { box-shadow: 0 0 0 3px var(--green), 0 18px 60px rgba(0,0,0,.5); }
+    .ba-slider img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+    .ba-slider .ba-layer-before { clip-path: inset(0 calc(100% - var(--pos)) 0 0); }
+    .ba-handle { position: absolute; top: 0; bottom: 0; left: var(--pos); width: 3px; background: #fff; transform: translateX(-50%); box-shadow: 0 0 14px rgba(0,0,0,.5); z-index: 3; }
+    .ba-grip {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+      width: 46px; height: 46px; border-radius: 50%;
+      background: var(--green); display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 18px rgba(0,0,0,.45), 0 0 0 5px rgba(255,255,255,.22);
+    }
+    .ba-slider .ba-badge { z-index: 2; }
+    .ba-hint { position: absolute; bottom: .85rem; left: 50%; transform: translateX(-50%); z-index: 2; font-size: .68rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: rgba(255,255,255,.85); background: rgba(8,17,30,.55); backdrop-filter: blur(6px); padding: .3rem .8rem; border-radius: 100px; white-space: nowrap; pointer-events: none; }
+
+    /* ── ROTATING ELEVATION BADGE ── */
+    .elev-badge { position: absolute; bottom: -24px; left: -24px; width: 112px; height: 112px; z-index: 5; pointer-events: none; filter: drop-shadow(0 6px 18px rgba(0,0,0,.45)); }
+    .elev-badge .ring { position: absolute; inset: 0; animation: spin-slow 16s linear infinite; }
+    .elev-badge .core { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 52px; height: 52px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; }
+    @keyframes spin-slow { to { transform: rotate(360deg); } }
+
+    /* ── STATS HAIRLINES ── */
+    @media(min-width:640px){ #stats-grid > div + div { border-left: 1px solid rgba(255,255,255,.08); } }
+
+    /* ── PROCESS: OUTLINED NUMERALS ── */
+    .step-num { font-size: 4.25rem; width: 3.25rem; color: transparent; -webkit-text-stroke: 2.5px var(--green); transition: color .25s; }
+    .proc-step:hover .step-num { color: var(--green); -webkit-text-stroke: 2px var(--green); }
+
+    /* ── MARKER UNDERLINE ── */
+    .marker-underline { position: relative; display: inline-block; }
+    .marker-underline svg { position: absolute; left: 2%; bottom: -.1em; width: 96%; height: .2em; overflow: visible; }
+    .marker-underline svg path { stroke: rgba(121,181,47,.55); stroke-width: 7; fill: none; stroke-linecap: round; stroke-dasharray: 220; stroke-dashoffset: 220; animation: draw-line 1s .7s cubic-bezier(.22,1,.36,1) forwards; }
+    @keyframes draw-line { to { stroke-dashoffset: 0; } }
+
+    /* ── FLAKE SPECKLE TEXTURE (CTA) ── */
+    .flake-bg::after {
+      content: '';
+      position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        radial-gradient(rgba(255,255,255,.13) 1.2px, transparent 1.3px),
+        radial-gradient(rgba(121,181,47,.2) 1px, transparent 1.1px),
+        radial-gradient(rgba(255,255,255,.06) 1.6px, transparent 1.7px);
+      background-size: 90px 90px, 70px 70px, 120px 120px;
+      background-position: 0 0, 32px 44px, 58px 12px;
+    }
+
+    /* ── FLAKE CHART LIGHTBOX ── */
+    .zoomable { cursor: zoom-in; position: relative; }
+    .zoomable:focus-visible { outline: 3px solid var(--green); outline-offset: 4px; border-radius: 16px; }
+    .zoomable:hover .zoom-hint { background: rgba(121,181,47,.85); }
+    .zoom-hint { position: absolute; bottom: .9rem; right: .9rem; display: inline-flex; align-items: center; gap: .4rem; background: rgba(13,24,37,.72); backdrop-filter: blur(6px); color: rgba(255,255,255,.9); font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: .35rem .8rem; border-radius: 100px; pointer-events: none; }
+    #lightbox { display: none; position: fixed; inset: 0; z-index: 600; align-items: center; justify-content: center; padding: 1.25rem; }
+    #lightbox .lb-bg { position: absolute; inset: 0; background: rgba(13,24,37,.88); backdrop-filter: blur(6px); }
+    #lightbox img { position: relative; z-index: 1; max-width: 96vw; max-height: 92vh; border-radius: 12px; box-shadow: 0 24px 90px rgba(0,0,0,.6); }
+    #lightbox .lb-close { position: absolute; top: 1.1rem; right: 1.1rem; z-index: 2; background: rgba(255,255,255,.1); border: none; border-radius: 50%; width: 42px; height: 42px; cursor: pointer; color: #fff; font-size: 1.5rem; line-height: 1; transition: background .2s; }
+    #lightbox .lb-close:hover { background: rgba(255,255,255,.22); }
+
+    /* ── STICKY MOBILE CTA BAR ── */
+    .mob-cta-bar { display: none; }
+    @media(max-width:767px){
+      .mob-cta-bar {
+        display: flex; gap: .6rem;
+        position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
+        background: rgba(13,24,37,.94); backdrop-filter: blur(14px);
+        border-top: 1px solid rgba(121,181,47,.3);
+        padding: .6rem .9rem calc(.6rem + env(safe-area-inset-bottom));
+      }
+      .mob-cta-bar a { flex: 1; display: flex; align-items: center; justify-content: center; gap: .45rem; font-size: .9rem; font-weight: 700; padding: .8rem .5rem; border-radius: 10px; text-decoration: none; }
+      .mcb-call { color: #fff; border: 1.5px solid rgba(255,255,255,.3); }
+      .mcb-call:active { background: rgba(255,255,255,.08); }
+      .mcb-est { background: var(--green); color: #fff; }
+      .mcb-est:active { background: var(--green-lt); }
+      body { padding-bottom: 70px; }
+    }
+
+    /* ── REDUCED MOTION ── */
+    @media (prefers-reduced-motion: reduce) {
+      .marquee-track, .logo-float, .btn-pulse, .hero-glow-1, .hero-glow-2, .elev-badge .ring, .marker-underline svg path { animation: none !important; }
+      .marker-underline svg path { stroke-dashoffset: 0; }
+      .js-reveal .rev, .js-reveal .rev-left, .js-reveal .rev-right { opacity: 1; transform: none; transition: none; }
+    }
   </style>
 </head>
 <body>
@@ -501,7 +617,7 @@
           <span style="font-size:.78rem;font-weight:700;color:rgba(255,255,255,.8);letter-spacing:.07em;text-transform:uppercase;">Colorado Mountain Specialists</span>
         </div>
         <h1 class="font-display rev d1" style="font-size:clamp(3rem,7.5vw,5.5rem);font-weight:900;letter-spacing:-.03em;color:#fff;line-height:.97;margin-bottom:1.5rem;">
-          Turn Your Garage<br>Into a <span class="shimmer-word">Showroom.</span>
+          Turn Your Garage<br>Into a <span class="shimmer-word marker-underline">Showroom.<svg viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true"><path d="M3 9 Q 50 3 100 7 T 197 5"/></svg></span>
         </h1>
         <p class="rev d2" style="font-size:1rem;color:rgba(255,255,255,.6);line-height:1.85;max-width:490px;margin-bottom:2.25rem;">
           Premium epoxy garage floor coatings engineered for Colorado's mountain climate. Serving all of Summit County — Breckenridge, Frisco, Silverthorne, Keystone — plus Vail, Aspen, and Steamboat Springs.
@@ -526,20 +642,28 @@
         </div>
       </div>
 
-      <!-- Before/After -->
-      <div class="rev-right d1" style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
-        <div>
-          <div class="g-item" style="aspect-ratio:3/4;">
-            <img src="ba-b1-new.png" alt="Before — bare garage floor" style="width:100%;height:100%;object-fit:cover;">
-            <div class="g-overlay"></div>
-            <div class="ba-badge ba-before">BEFORE</div>
+      <!-- Before/After compare slider -->
+      <div class="rev-right d1" style="position:relative;">
+        <div class="ba-slider" style="aspect-ratio:4/3.4;" tabindex="0" role="slider" aria-label="Before and after comparison — drag to reveal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+          <img src="ba-a1-new.png" alt="After — charcoal epoxy flake garage floor in Breckenridge CO">
+          <img class="ba-layer-before" src="ba-b1-new.png" alt="Before — bare concrete garage floor">
+          <div class="ba-badge ba-before">BEFORE</div>
+          <div class="ba-badge ba-after" style="left:auto;right:.75rem;">AFTER</div>
+          <div class="ba-handle">
+            <div class="ba-grip">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg>
+            </div>
           </div>
+          <div class="ba-hint">Drag to compare</div>
         </div>
-        <div>
-          <div class="g-item" style="aspect-ratio:3/4;">
-            <img src="ba-a1-new.png" alt="After — epoxy flake floor" style="width:100%;height:100%;object-fit:cover;">
-            <div class="g-overlay"></div>
-            <div class="ba-badge ba-after">AFTER</div>
+        <div class="elev-badge" aria-hidden="true">
+          <svg class="ring" viewBox="0 0 100 100">
+            <defs><path id="elev-circ" d="M50,50 m-39,0 a39,39 0 1,1 78,0 a39,39 0 1,1 -78,0"/></defs>
+            <circle cx="50" cy="50" r="49" fill="rgba(13,24,37,.82)"/>
+            <text font-size="9.5" font-weight="700" fill="rgba(255,255,255,.9)" letter-spacing="2.2" style="font-family:'Inter',sans-serif;"><textPath href="#elev-circ">RATED FOR 9,000+ FT · MOUNTAIN BUILT ·</textPath></text>
+          </svg>
+          <div class="core">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21l4-12 2.5 6L17 9l5 12H8z"/><path d="M2 21l4.5-9L9 17"/></svg>
           </div>
         </div>
       </div>
@@ -549,35 +673,49 @@
 </section>
 <style>
   @media(min-width:900px){ #hero-grid { grid-template-columns: 1fr 1fr; } }
-  @media(max-width:899px){ #hero-grid > div:last-child { display: none; } }
+  @media(max-width:899px){
+    #hero-grid > div:last-child { max-width: 560px; }
+    .elev-badge { left: -8px; bottom: -18px; width: 92px; height: 92px; }
+    .elev-badge .core { width: 42px; height: 42px; }
+  }
 </style>
 
-<!-- ══════════ TRUST BAR ══════════ -->
-<div class="trust-bar">
-  <div class="trust-items">
-    <div class="trust-item">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Lifetime Warranty
-    </div>
-    <span class="trust-sep">·</span>
-    <div class="trust-item">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-      1–2 Day Installation
-    </div>
-    <span class="trust-sep">·</span>
-    <div class="trust-item">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-      Local Colorado Crew
-    </div>
-    <span class="trust-sep">·</span>
-    <div class="trust-item">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
-      Free In-Person Estimates
-    </div>
-    <span class="trust-sep">·</span>
-    <div class="trust-item">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-      Mountain-Climate Rated
+<!-- ══════════ TRUST BAR (marquee) ══════════ -->
+<div class="trust-bar" style="padding-left:0;padding-right:0;">
+  <div class="marquee">
+    <div class="marquee-track" id="trust-track">
+      <div class="trust-group">
+        <div class="trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Lifetime Warranty
+        </div>
+        <span class="trust-sep">·</span>
+        <div class="trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          1–2 Day Installation
+        </div>
+        <span class="trust-sep">·</span>
+        <div class="trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          Local Colorado Crew
+        </div>
+        <span class="trust-sep">·</span>
+        <div class="trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+          Free In-Person Estimates
+        </div>
+        <span class="trust-sep">·</span>
+        <div class="trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          Mountain-Climate Rated
+        </div>
+        <span class="trust-sep">·</span>
+        <div class="trust-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M8 21l4-12 2.5 6L17 9l5 12H8z"/></svg>
+          Serving Summit County · Vail · Aspen · Steamboat
+        </div>
+        <span class="trust-sep">·</span>
+      </div>
     </div>
   </div>
 </div>
@@ -662,8 +800,16 @@
 </section>
 <style>@media(min-width:768px){#svc-grid{grid-template-columns:1fr 1fr;}}</style>
 
+<!-- ridge: charcoal → stone -->
+<div aria-hidden="true" style="background:var(--charcoal);line-height:0;">
+  <svg class="sec-ridge" viewBox="0 0 1440 80" preserveAspectRatio="none">
+    <path d="M0 54 L150 26 L310 48 L470 10 L630 44 L800 18 L960 50 L1120 24 L1280 54 L1440 30" fill="none" stroke="var(--green)" stroke-opacity=".5" stroke-width="2.5" transform="translate(0,-8)"/>
+    <path d="M0 80 L0 54 L150 26 L310 48 L470 10 L630 44 L800 18 L960 50 L1120 24 L1280 54 L1440 30 L1440 80 Z" fill="var(--stone)"/>
+  </svg>
+</div>
+
 <!-- ══════════ WHY US ══════════ -->
-<section id="why" style="padding:6rem 0;background:var(--stone);">
+<section id="why" class="topo" style="padding:6rem 0;background:var(--stone);">
   <div class="wrap">
     <div style="text-align:center;margin-bottom:3rem;">
       <p class="eyebrow rev">Why Summit</p>
@@ -754,8 +900,12 @@
       <p class="rev d2" style="color:#6b7280;max-width:500px;margin:0 auto;font-size:.95rem;line-height:1.75;">Dozens of standard blends — or build a fully custom mix. Every floor is one of a kind.</p>
     </div>
     <div style="display:grid;gap:4rem;align-items:center;" id="flakes-grid">
-      <div class="rev-left">
+      <div class="rev-left zoomable" onclick="openLightbox('flakes.png')" role="button" tabindex="0" aria-label="Enlarge flake color chart" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openLightbox('flakes.png');}">
         <img src="flakes.png" alt="Summit Concrete Finishes flake color chart — available blends for epoxy garage floors" style="width:100%;border-radius:16px;box-shadow:0 8px 48px rgba(0,0,0,.18);display:block;">
+        <span class="zoom-hint">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M11 8v6M8 11h6"/></svg>
+          Click to enlarge
+        </span>
       </div>
       <div style="display:flex;flex-direction:column;gap:1.75rem;">
         <div class="rev">
@@ -788,6 +938,14 @@
 </section>
 <style>@media(min-width:768px){#flakes-grid{grid-template-columns:3fr 2fr;}}</style>
 
+<!-- ridge: cream → charcoal -->
+<div aria-hidden="true" style="background:var(--cream);line-height:0;">
+  <svg class="sec-ridge" viewBox="0 0 1440 80" preserveAspectRatio="none">
+    <path d="M0 36 L170 52 L340 14 L520 46 L700 20 L880 50 L1060 12 L1240 44 L1440 24" fill="none" stroke="var(--green)" stroke-opacity=".5" stroke-width="2.5" transform="translate(0,-8)"/>
+    <path d="M0 80 L0 36 L170 52 L340 14 L520 46 L700 20 L880 50 L1060 12 L1240 44 L1440 24 L1440 80 Z" fill="var(--charcoal)"/>
+  </svg>
+</div>
+
 <!-- ══════════ GALLERY ══════════ -->
 <section id="gallery" style="padding:6rem 0;background:var(--charcoal);">
   <div class="wrap">
@@ -796,46 +954,39 @@
       <h2 class="section-h rev d1" style="margin:.5rem 0 1rem;">Before &amp; After</h2>
       <p class="rev d2" style="color:#6b7280;max-width:420px;margin:0 auto;font-size:.9rem;line-height:1.7;">Real Colorado jobs. Real results.</p>
     </div>
-    <div style="display:grid;gap:1rem;margin-bottom:1rem;" class="ba-grid rev">
-      <div class="g-item" style="aspect-ratio:16/9;">
-        <img src="ba-b1-new.png" alt="Before — bare concrete garage floor" style="width:100%;height:100%;object-fit:cover;">
-        <div class="g-overlay"></div>
+    <div class="rev" style="margin-bottom:1.25rem;">
+      <div class="ba-slider" style="aspect-ratio:16/8;" tabindex="0" role="slider" aria-label="Before and after — charcoal flake system, drag to reveal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+        <img src="ba-a1-new.png" alt="After — charcoal epoxy flake floor">
+        <img class="ba-layer-before" src="ba-b1-new.png" alt="Before — bare concrete garage floor">
         <div class="ba-badge ba-before">BEFORE</div>
-        <div class="g-label">Bare Concrete · 2-Car Garage</div>
+        <div class="ba-badge ba-after" style="left:auto;right:.75rem;">AFTER</div>
+        <div class="ba-handle"><div class="ba-grip"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg></div></div>
+        <div class="ba-hint">Drag to compare</div>
       </div>
-      <div class="g-item" style="aspect-ratio:16/9;">
-        <img src="ba-a1-new.png" alt="After — charcoal epoxy flake floor" style="width:100%;height:100%;object-fit:cover;">
-        <div class="g-overlay"></div>
-        <div class="ba-badge ba-after">AFTER</div>
-        <div class="g-label">Charcoal Flake System</div>
-      </div>
+      <p style="margin-top:.7rem;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:.04em;">Charcoal Flake System · 2-Car Garage</p>
     </div>
-    <div style="display:grid;gap:1rem;margin-bottom:1rem;" class="ba-grid rev d1">
-      <div class="g-item" style="aspect-ratio:16/9;">
-        <img src="ba-b2.jpg" alt="Before — stained garage floor" style="width:100%;height:100%;object-fit:cover;">
-        <div class="g-overlay"></div>
-        <div class="ba-badge ba-before">BEFORE</div>
-        <div class="g-label">Stained Garage Floor</div>
+    <div style="display:grid;gap:1.25rem;" class="ba-grid rev d1">
+      <div>
+        <div class="ba-slider" style="aspect-ratio:16/10;" tabindex="0" role="slider" aria-label="Before and after — full flake system, drag to reveal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+          <img src="ba-a2.jpg" alt="After — full flake epoxy system">
+          <img class="ba-layer-before" src="ba-b2.jpg" alt="Before — stained garage floor">
+          <div class="ba-badge ba-before">BEFORE</div>
+          <div class="ba-badge ba-after" style="left:auto;right:.75rem;">AFTER</div>
+          <div class="ba-handle"><div class="ba-grip"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg></div></div>
+          <div class="ba-hint">Drag to compare</div>
+        </div>
+        <p style="margin-top:.7rem;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:.04em;">Full Flake System</p>
       </div>
-      <div class="g-item" style="aspect-ratio:16/9;">
-        <img src="ba-a2.jpg" alt="After — full flake epoxy system" style="width:100%;height:100%;object-fit:cover;">
-        <div class="g-overlay"></div>
-        <div class="ba-badge ba-after">AFTER</div>
-        <div class="g-label">Full Flake System</div>
-      </div>
-    </div>
-    <div style="display:grid;gap:1rem;" class="ba-grid rev d2">
-      <div class="g-item" style="aspect-ratio:16/9;">
-        <img src="ba-b3.jpg" alt="Before — worn garage floor" style="width:100%;height:100%;object-fit:cover;">
-        <div class="g-overlay"></div>
-        <div class="ba-badge ba-before">BEFORE</div>
-        <div class="g-label">Worn 3-Car Garage</div>
-      </div>
-      <div class="g-item" style="aspect-ratio:16/9;">
-        <img src="ba-a3.jpg" alt="After — marble blend showroom finish" style="width:100%;height:100%;object-fit:cover;">
-        <div class="g-overlay"></div>
-        <div class="ba-badge ba-after">AFTER</div>
-        <div class="g-label">Marble Blend · Showroom Finish</div>
+      <div>
+        <div class="ba-slider" style="aspect-ratio:16/10;" tabindex="0" role="slider" aria-label="Before and after — marble blend showroom finish, drag to reveal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+          <img src="ba-a3.jpg" alt="After — marble blend showroom finish">
+          <img class="ba-layer-before" src="ba-b3.jpg" alt="Before — worn 3-car garage floor">
+          <div class="ba-badge ba-before">BEFORE</div>
+          <div class="ba-badge ba-after" style="left:auto;right:.75rem;">AFTER</div>
+          <div class="ba-handle"><div class="ba-grip"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg></div></div>
+          <div class="ba-hint">Drag to compare</div>
+        </div>
+        <p style="margin-top:.7rem;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:.04em;">Marble Blend · Showroom Finish</p>
       </div>
     </div>
   </div>
@@ -870,8 +1021,16 @@
 </section>
 <style>@media(min-width:768px){#rev-grid{grid-template-columns:repeat(3,1fr);}}</style>
 
+<!-- ridge: dark → stone -->
+<div aria-hidden="true" style="background:var(--dark);line-height:0;">
+  <svg class="sec-ridge" viewBox="0 0 1440 80" preserveAspectRatio="none">
+    <path d="M0 48 L190 18 L380 50 L560 8 L740 42 L920 22 L1100 52 L1280 16 L1440 44" fill="none" stroke="var(--green)" stroke-opacity=".5" stroke-width="2.5" transform="translate(0,-8)"/>
+    <path d="M0 80 L0 48 L190 18 L380 50 L560 8 L740 42 L920 22 L1100 52 L1280 16 L1440 44 L1440 80 Z" fill="var(--stone)"/>
+  </svg>
+</div>
+
 <!-- ══════════ LOCATIONS ══════════ -->
-<section id="locations" style="padding:6rem 0;background:var(--stone);">
+<section id="locations" class="topo" style="padding:6rem 0;background:var(--stone);">
   <div class="wrap">
     <div style="text-align:center;margin-bottom:3rem;">
       <p class="eyebrow rev">Service Area</p>
@@ -1020,7 +1179,7 @@
 </section>
 
 <!-- ══════════ CTA BANNER ══════════ -->
-<section style="padding:6rem 0;background:var(--navy);position:relative;overflow:hidden;">
+<section class="flake-bg" style="padding:6rem 0;background:var(--navy);position:relative;overflow:hidden;">
   <div style="position:absolute;top:-40%;left:50%;transform:translateX(-50%);width:700px;height:700px;background:radial-gradient(circle,rgba(121,181,47,.15) 0%,transparent 65%);pointer-events:none;"></div>
   <div class="wrap" style="text-align:center;position:relative;z-index:1;">
     <img src="logo.png" alt="Summit Concrete Finishes" class="rev" style="height:68px;width:auto;margin-bottom:2rem;opacity:.6;filter:brightness(10) saturate(0);">
@@ -1188,6 +1347,22 @@
   </div>
 </footer>
 <style>@media(min-width:640px){#ft-grid{grid-template-columns:2fr 1fr 1fr;}}</style>
+
+<!-- ══════════ FLAKE LIGHTBOX ══════════ -->
+<div id="lightbox" onclick="closeLightbox()">
+  <div class="lb-bg"></div>
+  <button class="lb-close" aria-label="Close">&times;</button>
+  <img src="" alt="Flake color chart — enlarged view">
+</div>
+
+<!-- ══════════ STICKY MOBILE CTA ══════════ -->
+<div class="mob-cta-bar">
+  <a href="tel:9706967921" class="mcb-call">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.93a19.79 19.79 0 01-3.07-8.67A2 2 0 012.18 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 8.09a16 16 0 006 6l.56-.56a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+    Call Now
+  </a>
+  <a href="#" onclick="openEstimateModal();return false;" class="mcb-est">Free Estimate</a>
+</div>
 
 <!-- ══════════ ESTIMATE MODAL ══════════ -->
 <div id="estimate-modal" style="display:none;position:fixed;inset:0;z-index:500;align-items:center;justify-content:center;padding:1.25rem;">
@@ -1378,6 +1553,76 @@
       msg.textContent = 'Something went wrong. Please call us at (970) 696-7921.';
     }
   }
+
+  // Before/After compare sliders
+  document.querySelectorAll('.ba-slider').forEach(sl => {
+    const setPos = pct => {
+      pct = Math.max(3, Math.min(97, pct));
+      sl.style.setProperty('--pos', pct + '%');
+      sl.setAttribute('aria-valuenow', Math.round(pct));
+    };
+    const fromX = x => {
+      const r = sl.getBoundingClientRect();
+      setPos((x - r.left) / r.width * 100);
+    };
+    sl.addEventListener('pointerdown', e => {
+      sl.dataset.user = '1';
+      sl.setPointerCapture(e.pointerId);
+      fromX(e.clientX);
+      const mv = ev => fromX(ev.clientX);
+      sl.addEventListener('pointermove', mv);
+      sl.addEventListener('pointerup', () => sl.removeEventListener('pointermove', mv), { once: true });
+    });
+    sl.addEventListener('keydown', e => {
+      const cur = parseFloat(sl.style.getPropertyValue('--pos')) || 50;
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); setPos(cur - 4); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); setPos(cur + 4); }
+    });
+  });
+
+  // Intro sweep: animate handle 90% → 50% the first time each slider scrolls into view
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const baObserver = new IntersectionObserver(entries => {
+    entries.forEach(en => {
+      if (!en.isIntersecting) return;
+      baObserver.unobserve(en.target);
+      if (reduceMotion) return;
+      const sl = en.target;
+      let start = null;
+      const dur = 1100;
+      const tick = t => {
+        if (sl.dataset.user) return;
+        if (!start) start = t;
+        const p = Math.min((t - start) / dur, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        sl.style.setProperty('--pos', (90 - 40 * ease) + '%');
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  }, { threshold: 0.45 });
+  document.querySelectorAll('.ba-slider').forEach(sl => baObserver.observe(sl));
+
+  // Seamless trust marquee: clone the group once
+  const trustTrack = document.getElementById('trust-track');
+  if (trustTrack) {
+    const clone = trustTrack.firstElementChild.cloneNode(true);
+    clone.setAttribute('aria-hidden', 'true');
+    trustTrack.appendChild(clone);
+  }
+
+  // Flake chart lightbox
+  function openLightbox(src) {
+    const lb = document.getElementById('lightbox');
+    lb.querySelector('img').src = src;
+    lb.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    document.getElementById('lightbox').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
   // Scroll reveal
   document.documentElement.classList.add('js-reveal');
