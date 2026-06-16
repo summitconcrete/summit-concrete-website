@@ -10,6 +10,7 @@
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'AW-18184887251');
+    gtag('config', 'G-XQX6N8X8SW');
   </script>
   <title>Epoxy Garage Floors in Colorado Mountain Towns | Summit County, Vail, Aspen & Steamboat | Summit Concrete Finishes</title>
   <meta name="description" content="Premium epoxy garage floor coatings for Colorado's mountain towns — Summit County (Breckenridge, Frisco, Silverthorne), Vail, Aspen & Steamboat Springs. Rated for 9,000+ ft freeze-thaw climates. Lifetime warranty. Free estimates.">
@@ -1503,6 +1504,7 @@
       if (res.ok) {
         msg.style.display = 'block'; msg.style.background = '#f0fdf4'; msg.style.color = '#166534';
         msg.textContent = '✓ Thanks! We\'ll reach out within 24 hours to schedule your estimate.';
+        if (typeof gtag === 'function') gtag('event', 'generate_lead', { form_location: 'homepage_form' });
         e.target.reset();
       } else {
         msg.style.display = 'block'; msg.style.background = '#fef2f2'; msg.style.color = '#991b1b';
@@ -1582,6 +1584,7 @@
       if (res.ok) {
         msg.style.display = 'block'; msg.style.background = '#f0fdf4'; msg.style.color = '#166534';
         msg.textContent = '✓ Thanks! We\'ll reach out within 24 hours to schedule your estimate.';
+        if (typeof gtag === 'function') gtag('event', 'generate_lead', { form_location: 'homepage_popup' });
         e.target.reset();
       } else {
         msg.style.display = 'block'; msg.style.background = '#fef2f2'; msg.style.color = '#991b1b';
