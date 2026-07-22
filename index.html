@@ -625,9 +625,19 @@
 
 <!-- ══════════ HERO ══════════ -->
 <section id="hero">
-  <video autoplay muted loop playsinline poster="hero-poster.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:.55;pointer-events:none;">
-    <source src="hero-bg.mp4" type="video/mp4">
-  </video>
+  <video id="hero-video" autoplay muted loop playsinline preload="none" poster="hero-poster.jpg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:.55;pointer-events:none;"></video>
+  <script>
+    (function(){
+      var v = document.getElementById('hero-video');
+      var conn = navigator.connection || {};
+      if (window.matchMedia('(min-width:768px)').matches && !conn.saveData) {
+        var s = document.createElement('source');
+        s.src = 'hero-bg.mp4'; s.type = 'video/mp4';
+        v.appendChild(s); v.load();
+        v.play().catch(function(){});
+      }
+    })();
+  </script>
   <div style="position:absolute;inset:0;background:linear-gradient(160deg,rgba(13,24,37,.82) 0%,rgba(13,24,37,.65) 55%,rgba(13,24,37,.45) 100%);pointer-events:none;"></div>
   <div class="wrap" style="padding-top:5rem;padding-bottom:5rem;position:relative;z-index:1;">
     <div style="display:grid;gap:3rem;align-items:center;" id="hero-grid">
@@ -794,6 +804,7 @@
             <li>Shop Floors &amp; Ski Rooms</li>
             <li>Mudrooms &amp; Entryways</li>
           </ul>
+          <a href="epoxy-flake-garage-floors.html" style="display:inline-block;margin-top:1.1rem;color:var(--green);font-size:.875rem;font-weight:700;text-decoration:none;" onmouseover="this.style.color='var(--green-lt)'" onmouseout="this.style.color='var(--green)'">Learn more about our flake system &rarr;</a>
         </div>
       </div>
 
@@ -814,6 +825,7 @@
             <li>Ski Rooms &amp; Gear Halls</li>
             <li>Home Gyms &amp; Studios</li>
           </ul>
+          <a href="concrete-grind-and-seal.html" style="display:inline-block;margin-top:1.1rem;color:var(--green);font-size:.875rem;font-weight:700;text-decoration:none;" onmouseover="this.style.color='var(--green-lt)'" onmouseout="this.style.color='var(--green)'">Learn more about grind &amp; seal &rarr;</a>
         </div>
       </div>
 
@@ -923,7 +935,7 @@
     </div>
     <div style="display:grid;gap:4rem;align-items:center;" id="flakes-grid">
       <div class="rev-left zoomable" onclick="openLightbox('flakes.png')" role="button" tabindex="0" aria-label="Enlarge flake color chart" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openLightbox('flakes.png');}">
-        <img src="flakes.png" alt="Summit Concrete Finishes flake color chart — available blends for epoxy garage floors" style="width:100%;border-radius:16px;box-shadow:0 8px 48px rgba(0,0,0,.18);display:block;">
+        <img src="flakes.png" alt="Summit Concrete Finishes flake color chart — available blends for epoxy garage floors" style="width:100%;border-radius:16px;box-shadow:0 8px 48px rgba(0,0,0,.18);display:block;" loading="lazy">
         <span class="zoom-hint">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M11 8v6M8 11h6"/></svg>
           Click to enlarge
@@ -978,8 +990,8 @@
     </div>
     <div class="rev" style="margin-bottom:1.25rem;">
       <div class="ba-slider" style="aspect-ratio:16/8;" tabindex="0" role="slider" aria-label="Before and after — full flake system, drag to reveal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
-        <img src="ba-after.jpg" alt="After — full-broadcast epoxy flake floor">
-        <img class="ba-layer-before" src="ba-before.jpg" alt="Before — bare concrete garage floor">
+        <img src="ba-after.jpg" alt="After — full-broadcast epoxy flake floor" loading="lazy">
+        <img class="ba-layer-before" src="ba-before.jpg" alt="Before — bare concrete garage floor" loading="lazy">
         <div class="ba-badge ba-before">BEFORE</div>
         <div class="ba-badge ba-after" style="left:auto;right:.75rem;">AFTER</div>
         <div class="ba-handle"><div class="ba-grip"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg></div></div>
@@ -990,8 +1002,8 @@
     <div style="display:grid;gap:1.25rem;" class="ba-grid rev d1">
       <div>
         <div class="ba-slider" style="aspect-ratio:16/10;" tabindex="0" role="slider" aria-label="Before and after — charcoal flake system, drag to reveal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
-          <img src="ba-after2.jpg" alt="After — charcoal epoxy flake floor in a 3-car garage">
-          <img class="ba-layer-before" src="ba-before2.jpg" alt="Before — bare concrete 3-car garage floor">
+          <img src="ba-after2.jpg" alt="After — charcoal epoxy flake floor in a 3-car garage" loading="lazy">
+          <img class="ba-layer-before" src="ba-before2.jpg" alt="Before — bare concrete 3-car garage floor" loading="lazy">
           <div class="ba-badge ba-before">BEFORE</div>
           <div class="ba-badge ba-after" style="left:auto;right:.75rem;">AFTER</div>
           <div class="ba-handle"><div class="ba-grip"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg></div></div>
@@ -1001,8 +1013,8 @@
       </div>
       <div>
         <div class="ba-slider" style="aspect-ratio:16/10;" tabindex="0" role="slider" aria-label="Before and after — earth-tone flake in a mountain ski garage, drag to reveal" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
-          <img src="ba-after3.jpg" alt="After — earth-tone epoxy flake floor in a Colorado mountain ski garage">
-          <img class="ba-layer-before" src="ba-before3.jpg" alt="Before — bare concrete floor in a mountain ski garage">
+          <img src="ba-after3.jpg" alt="After — earth-tone epoxy flake floor in a Colorado mountain ski garage" loading="lazy">
+          <img class="ba-layer-before" src="ba-before3.jpg" alt="Before — bare concrete floor in a mountain ski garage" loading="lazy">
           <div class="ba-badge ba-before">BEFORE</div>
           <div class="ba-badge ba-after" style="left:auto;right:.75rem;">AFTER</div>
           <div class="ba-handle"><div class="ba-grip"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg></div></div>
@@ -1021,7 +1033,43 @@
         <div class="ba-badge ba-after">AFTER</div>
       </div>
     </div>
-    <p style="margin-top:.7rem;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:.04em;">Full-Broadcast Tan Flake · Silverthorne, Summit County</p>
+    <p style="margin-top:.7rem;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:.04em;">Full-Broadcast Tan Flake · Silverthorne, Summit County — <a href="silverthorne-epoxy-garage-floor-project.html" style="color:var(--green);text-decoration:none;" onmouseover="this.style.color='var(--green-lt)'" onmouseout="this.style.color='var(--green)'">See the full project &rarr;</a></p>
+
+    <div class="ba-grid rev d2" style="display:grid;gap:1.25rem;margin-top:1.25rem;">
+      <div style="position:relative;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.4),0 18px 60px rgba(0,0,0,.5);aspect-ratio:4/5;">
+        <img src="frisco-epoxy-garage-floor-before.jpeg" alt="Before — bare concrete garage floor in Frisco CO" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">
+        <div class="ba-badge ba-before">BEFORE</div>
+      </div>
+      <div style="position:relative;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.4),0 18px 60px rgba(0,0,0,.5);aspect-ratio:4/5;">
+        <img src="frisco-epoxy-garage-floor-after.jpeg" alt="After — grey epoxy flake garage floor in a Frisco CO mountain home garage" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">
+        <div class="ba-badge ba-after">AFTER</div>
+      </div>
+    </div>
+    <p style="margin-top:.7rem;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:.04em;">Full-Broadcast Grey Flake · Frisco, Summit County</p>
+
+    <div class="ba-grid rev d2" style="display:grid;gap:1.25rem;margin-top:1.25rem;">
+      <div style="position:relative;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.4),0 18px 60px rgba(0,0,0,.5);aspect-ratio:4/5;">
+        <img src="keystone-epoxy-garage-floor-before.jpeg" alt="Before — bare concrete garage floor in Keystone CO" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">
+        <div class="ba-badge ba-before">BEFORE</div>
+      </div>
+      <div style="position:relative;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.4),0 18px 60px rgba(0,0,0,.5);aspect-ratio:4/5;">
+        <img src="keystone-epoxy-garage-floor-after.jpeg" alt="After — tan epoxy flake garage floor in a Keystone CO mountain home garage" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">
+        <div class="ba-badge ba-after">AFTER</div>
+      </div>
+    </div>
+    <p style="margin-top:.7rem;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:.04em;">Full-Broadcast Tan Flake · Keystone, Summit County</p>
+
+    <div class="ba-grid rev d2" style="display:grid;gap:1.25rem;margin-top:1.25rem;">
+      <div style="position:relative;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.4),0 18px 60px rgba(0,0,0,.5);aspect-ratio:4/5;">
+        <img src="silverthorne-epoxy-garage-floor-before-2.jpeg" alt="Before — bare concrete garage floor in Silverthorne CO" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">
+        <div class="ba-badge ba-before">BEFORE</div>
+      </div>
+      <div style="position:relative;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.4),0 18px 60px rgba(0,0,0,.5);aspect-ratio:4/5;">
+        <img src="silverthorne-epoxy-garage-floor-after-2.jpeg" alt="After — grey epoxy flake garage floor in a Silverthorne CO mountain home garage" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">
+        <div class="ba-badge ba-after">AFTER</div>
+      </div>
+    </div>
+    <p style="margin-top:.7rem;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:700;color:rgba(255,255,255,.55);letter-spacing:.04em;">Full-Broadcast Grey Flake · Silverthorne, Summit County</p>
   </div>
 </section>
 <style>@media(min-width:640px){.ba-grid{grid-template-columns:1fr 1fr;}}</style>
@@ -1364,8 +1412,10 @@
       <div>
         <div class="font-display" style="color:rgba(255,255,255,.22);font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:1rem;">Services</div>
         <ul style="list-style:none;display:flex;flex-direction:column;gap:.65rem;">
-          <li><a href="#services" style="color:rgba(255,255,255,.45);text-decoration:none;font-size:.875rem;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.45)'">Epoxy Flake System</a></li>
-          <li><a href="#services" style="color:rgba(255,255,255,.45);text-decoration:none;font-size:.875rem;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.45)'">Grind &amp; Seal</a></li>
+          <li><a href="epoxy-flake-garage-floors.html" style="color:var(--green);text-decoration:none;font-size:.875rem;font-weight:600;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--green)'">Epoxy Flake System</a></li>
+          <li><a href="polyaspartic-floor-coatings.html" style="color:var(--green);text-decoration:none;font-size:.875rem;font-weight:600;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--green)'">Polyaspartic Coatings</a></li>
+          <li><a href="metallic-epoxy-floors.html" style="color:var(--green);text-decoration:none;font-size:.875rem;font-weight:600;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--green)'">Metallic Epoxy Floors</a></li>
+          <li><a href="concrete-grind-and-seal.html" style="color:var(--green);text-decoration:none;font-size:.875rem;font-weight:600;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--green)'">Grind &amp; Seal</a></li>
           <li><a href="#flakes"   style="color:rgba(255,255,255,.45);text-decoration:none;font-size:.875rem;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.45)'">Flake Color Options</a></li>
           <li><a href="#gallery"  style="color:rgba(255,255,255,.45);text-decoration:none;font-size:.875rem;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.45)'">Gallery</a></li>
         </ul>
@@ -1379,6 +1429,8 @@
           <li><a href="#locations" style="color:rgba(255,255,255,.45);text-decoration:none;font-size:.875rem;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.45)'">Dillon, Silverthorne &amp; Copper Mtn</a></li>
           <li><a href="aspen-epoxy-garage-floors.html" style="color:var(--green);text-decoration:none;font-size:.875rem;font-weight:600;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--green)'">Aspen &amp; Snowmass Epoxy Floors</a></li>
           <li><a href="steamboat-epoxy-garage-floors.html" style="color:rgba(255,255,255,.45);text-decoration:none;font-size:.875rem;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.45)'">Steamboat Springs</a></li>
+          <li><a href="winter-park-epoxy-garage-floors.html" style="color:rgba(255,255,255,.45);text-decoration:none;font-size:.875rem;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.45)'">Winter Park &amp; Grand County</a></li>
+          <li><a href="glenwood-springs-epoxy-garage-floors.html" style="color:rgba(255,255,255,.45);text-decoration:none;font-size:.875rem;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.45)'">Glenwood Springs</a></li>
         </ul>
       </div>
     </div>
