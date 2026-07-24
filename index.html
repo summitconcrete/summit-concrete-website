@@ -583,6 +583,7 @@
       .marquee-track, .logo-float, .btn-pulse, .hero-glow-1, .hero-glow-2, .elev-badge .ring, .marker-underline svg path { animation: none !important; }
       .marker-underline svg path { stroke-dashoffset: 0; }
       .js-reveal .rev, .js-reveal .rev-left, .js-reveal .rev-right { opacity: 1; transform: none; transition: none; }
+      .rev-track { transition: none !important; }
     }
   </style>
 </head>
@@ -1087,33 +1088,109 @@
       <p class="eyebrow rev">Google Reviews</p>
       <h2 class="section-h rev d1" style="margin:.5rem 0 1rem;">What Colorado<br>Homeowners Say</h2>
     </div>
-    <div style="display:grid;gap:1.5rem;" id="rev-grid">
-      <div class="review-card rev">
-        <div class="stars">★★★★★</div>
-        <p class="review-text">"Did a great job on our garage here in Silverthorne. We got a bid from another company that was way overpriced — he came in and did it in two days, no problem. Very professional. I highly recommend these guys!"</p>
-        <div><div class="reviewer">Cody M. <span class="reviewer-loc">— Google review</span></div></div>
+    <div class="rev-outer rev d1">
+      <button class="rev-arrow" id="rev-prev" onclick="revSlide(-1)" aria-label="Previous reviews">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="rev-viewport">
+        <div class="rev-track" id="rev-track">
+          <div class="review-card">
+            <div class="stars">★★★★★</div>
+            <p class="review-text">"Did a great job on our garage here in Silverthorne. We got a bid from another company that was way overpriced — he came in and did it in two days, no problem. Very professional. I highly recommend these guys!"</p>
+            <div><div class="reviewer">Cody M. <span class="reviewer-loc">— Google review</span></div></div>
+          </div>
+          <div class="review-card">
+            <div class="stars">★★★★★</div>
+            <p class="review-text">"William did my garage and it looks great! I am so happy to have found someone in Steamboat to be able to do our garage. Would definitely recommend Summit concrete finishes. Thanks Will!"</p>
+            <div><div class="reviewer">Mohammed N. <span class="reviewer-loc">— Google review</span></div></div>
+          </div>
+          <div class="review-card">
+            <div class="stars">★★★★★</div>
+            <p class="review-text">"The Summit Concrete team, Will in particular, had great communication and delivered on his promise. Would use them again and will refer to friends."</p>
+            <div><div class="reviewer">Miles A. <span class="reviewer-loc">— Google review</span></div></div>
+          </div>
+          <div class="review-card">
+            <div class="stars">★★★★★</div>
+            <p class="review-text">"Very impressed with my new garage floors. They were on time and did a wonderful job, would definitely recommend!!!"</p>
+            <div><div class="reviewer">Jill <span class="reviewer-loc">— Google review</span></div></div>
+          </div>
+          <div class="review-card">
+            <div class="stars">★★★★★</div>
+            <p class="review-text">"Reasonable price. Will was on time and efficient. Floor was completed in 2 days and looks great!"</p>
+            <div><div class="reviewer">Brian V. <span class="reviewer-loc">— Google review</span></div></div>
+          </div>
+          <div class="review-card">
+            <div class="stars">★★★★★</div>
+            <p class="review-text">"Great price. Will is great and very responsive. Contacted him for a quote and he replied almost immediately to schedule a visit, showed up on time, took measurements, and gave us a quote. Will texted his arrival time window before day 1 and day 2 and met it both times."</p>
+            <div><div class="reviewer">Patricia D. <span class="reviewer-loc">— Google review</span></div></div>
+          </div>
+          <div class="review-card">
+            <div class="stars">★★★★★</div>
+            <p class="review-text">"My garage looks amazing! They did such a fantastic job. Very professional, on time, and very clean! You won't be disappointed!"</p>
+            <div><div class="reviewer">Lauren R. <span class="reviewer-loc">— Google review</span></div></div>
+          </div>
+        </div>
       </div>
-      <div class="review-card rev">
-        <div class="stars">★★★★★</div>
-        <p class="review-text">"William did my garage and it looks great! I am so happy to have found someone in Steamboat to be able to do our garage. Would definitely recommend Summit concrete finishes. Thanks Will!"</p>
-        <div><div class="reviewer">Mohammed N. <span class="reviewer-loc">— Google review</span></div></div>
-      </div>
-      <div class="review-card rev d1">
-        <div class="stars">★★★★★</div>
-        <p class="review-text">"The Summit Concrete team, Will in particular, had great communication and delivered on his promise. Would use them again and will refer to friends."</p>
-        <div><div class="reviewer">Miles A. <span class="reviewer-loc">— Google review</span></div></div>
-      </div>
-      <div class="review-card rev d2">
-        <div class="stars">★★★★★</div>
-        <p class="review-text">"Very impressed with my new garage floors. They were on time and did a wonderful job, would definitely recommend!!!"</p>
-        <div><div class="reviewer">Jill <span class="reviewer-loc">— Google review</span></div></div>
-      </div>
+      <button class="rev-arrow" id="rev-next" onclick="revSlide(1)" aria-label="Next reviews">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
     </div>
-    <div class="rev d3" style="text-align:center;margin-top:2.5rem;">
+    <div class="rev d2" style="text-align:center;margin-top:2.5rem;">
       <a href="https://www.google.com/maps/search/?api=1&amp;query=Summit+Concrete+Finishes+Steamboat+Springs+CO" target="_blank" rel="noopener" class="btn-ghost" style="font-size:.95rem;">Read All Our Reviews on Google</a>
     </div>
   </div>
 </section>
+<style>
+  .rev-outer { display:flex; align-items:center; gap:.75rem; }
+  .rev-viewport { overflow:hidden; flex:1; min-width:0; }
+  .rev-track { display:flex; gap:1.5rem; transition:transform .5s cubic-bezier(.22,1,.36,1); will-change:transform; }
+  .rev-track .review-card { flex:0 0 100%; }
+  @media(min-width:640px){ .rev-track .review-card{ flex:0 0 calc(50% - .75rem); } }
+  @media(min-width:1100px){ .rev-track .review-card{ flex:0 0 calc(25% - 1.125rem); } }
+  .rev-arrow { flex-shrink:0; width:44px; height:44px; border-radius:50%; background:var(--green); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .2s, transform .15s, opacity .2s; box-shadow:0 4px 16px rgba(0,0,0,.35); }
+  .rev-arrow:hover:not(:disabled) { background:var(--green-lt); transform:scale(1.06); }
+  .rev-arrow:active:not(:disabled) { transform:scale(.96); }
+  .rev-arrow:disabled { opacity:.3; cursor:default; }
+  @media(max-width:480px){ .rev-arrow{ width:36px; height:36px; } }
+</style>
+<script>
+  (function(){
+    var track = document.getElementById('rev-track');
+    var viewport = track.parentElement;
+    var prevBtn = document.getElementById('rev-prev');
+    var nextBtn = document.getElementById('rev-next');
+    var cards = Array.prototype.slice.call(track.children);
+    var index = 0;
+
+    function step() {
+      var gap = parseFloat(getComputedStyle(track).columnGap || getComputedStyle(track).gap || 0);
+      return cards[0].getBoundingClientRect().width + gap;
+    }
+    function visibleCount() {
+      return Math.max(1, Math.round(viewport.clientWidth / step()));
+    }
+    function maxIndex() {
+      return Math.max(0, cards.length - visibleCount());
+    }
+    function render() {
+      var mi = maxIndex();
+      if (index > mi) index = mi;
+      track.style.transform = 'translateX(-' + (index * step()) + 'px)';
+      prevBtn.disabled = index <= 0;
+      nextBtn.disabled = index >= mi;
+    }
+    window.revSlide = function(dir) {
+      index = Math.min(Math.max(index + dir, 0), maxIndex());
+      render();
+    };
+    var resizeTimer;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(render, 120);
+    });
+    render();
+  })();
+</script>
 <style>@media(min-width:768px){#rev-grid{grid-template-columns:repeat(2,1fr);}}@media(min-width:1100px){#rev-grid{grid-template-columns:repeat(4,1fr);}}</style>
 
 <!-- ridge: dark → stone -->
