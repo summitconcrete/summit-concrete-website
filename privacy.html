@@ -169,5 +169,17 @@
   </div>
 </footer>
 
+<script>
+  // Phone-call conversion tracking — reports every tel: click to GA4 + Google Ads.
+  // Without it, calls are invisible to Ads and Smart Bidding can only optimise for form fills.
+  (function(){
+    document.addEventListener('click', function(e){
+      var a = e.target.closest && e.target.closest('a[href^="tel:"]');
+      if (!a || typeof gtag !== 'function') return;
+      gtag('event', 'click_to_call', { call_location: a.dataset.callLocation || 'page' });
+      gtag('event', 'ads_conversion_call_click', {});
+    }, true);
+  })();
+</script>
 </body>
 </html>
